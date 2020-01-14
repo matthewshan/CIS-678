@@ -1,0 +1,4 @@
+Hello, this is a test file to test the first project for our Machine Learning course
+at Grand Valley State University. What it does is it calculates the number of sentences,
+words, and syllables in a document, and does some math to determine the complexity of
+it. The higher the number, the higher the complexity. Simple, right?

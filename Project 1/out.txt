@@ -1,0 +1,176 @@
+Program started
+Word: Hello,
+Trimmed Word: Hello
+Total syllables: 2
+Word: this
+Trimmed Word: this
+Total syllables: 1
+Word: is
+Trimmed Word: is
+Total syllables: 1
+Word: a
+Trimmed Word: a
+Total syllables: 1
+Word: test
+Trimmed Word: test
+Total syllables: 1
+Word: file
+Trimmed Word: file
+Total syllables: 1
+Word: to
+Trimmed Word: to
+Total syllables: 1
+Word: test
+Trimmed Word: test
+Total syllables: 1
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: first
+Trimmed Word: first
+Total syllables: 1
+Word: project
+Trimmed Word: project
+Total syllables: 2
+Word: for
+Trimmed Word: for
+Total syllables: 1
+Word: our
+Trimmed Word: our
+Total syllables: 1
+Word: Machine
+Trimmed Word: Machine
+Total syllables: 2
+Word: Learning
+Trimmed Word: Learning
+Total syllables: 2
+Word: course
+
+Trimmed Word: course
+Total syllables: 1
+Word: at
+Trimmed Word: at
+Total syllables: 1
+Word: Grand
+Trimmed Word: Grand
+Total syllables: 1
+Word: Valley
+Trimmed Word: Valley
+Total syllables: 2
+Word: State
+Trimmed Word: State
+Total syllables: 1
+Word: University.
+Trimmed Word: University
+Total syllables: 5
+Word: What
+Trimmed Word: What
+Total syllables: 1
+Word: it
+Trimmed Word: it
+Total syllables: 1
+Word: does
+Trimmed Word: does
+Total syllables: 1
+Word: is
+Trimmed Word: is
+Total syllables: 1
+Word: it
+Trimmed Word: it
+Total syllables: 1
+Word: calculates
+Trimmed Word: calculates
+Total syllables: 4
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: number
+Trimmed Word: number
+Total syllables: 2
+Word: of
+Trimmed Word: of
+Total syllables: 1
+Word: sentences,
+
+Trimmed Word: sentences
+Total syllables: 3
+Word: words,
+Trimmed Word: words
+Total syllables: 1
+Word: and
+Trimmed Word: and
+Total syllables: 1
+Word: syllables
+Trimmed Word: syllables
+Total syllables: 3
+Word: in
+Trimmed Word: in
+Total syllables: 1
+Word: a
+Trimmed Word: a
+Total syllables: 1
+Word: document,
+Trimmed Word: document
+Total syllables: 3
+Word: and
+Trimmed Word: and
+Total syllables: 1
+Word: does
+Trimmed Word: does
+Total syllables: 1
+Word: some
+Trimmed Word: some
+Total syllables: 1
+Word: math
+Trimmed Word: math
+Total syllables: 1
+Word: to
+Trimmed Word: to
+Total syllables: 1
+Word: determine
+Trimmed Word: determine
+Total syllables: 3
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: complexity
+Trimmed Word: complexity
+Total syllables: 4
+Word: of
+
+Trimmed Word: of
+Total syllables: 1
+Word: it.
+Trimmed Word: it
+Total syllables: 1
+Word: The
+Trimmed Word: The
+Total syllables: 0
+Word: higher
+Trimmed Word: higher
+Total syllables: 2
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: number,
+Trimmed Word: number
+Total syllables: 2
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: higher
+Trimmed Word: higher
+Total syllables: 2
+Word: the
+Trimmed Word: the
+Total syllables: 0
+Word: complexity.
+Trimmed Word: complexity
+Total syllables: 4
+Word: Simple,
+Trimmed Word: Simple
+Total syllables: 1
+Word: right?
+Trimmed Word: right
+Total syllables: 1
+The total complexity of your document with 4 sentences, 57 words, and 80 syllables has a Flesch complexity of 73.63440789473685.
