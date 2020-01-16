@@ -1,15 +1,31 @@
 import matplotlib.pyplot as plot
 from matplotlib.ticker import PercentFormatter
 import numpy as np
+import os, sys, traceback
+debug = False
 def main():
+    print ("Program started")
+   
+    #What this loop basically does it gets all the txt files from the Input directory and sends each through our program
+    if debug: 
+        process_file("test.txt")
+    else:
+        for r, d, f in os.walk("Input/"):
+            for file_path in f:
+                if '.txt' in file_path:
+                    process_file(file_path)    
+
+
+def process_file(path):
+    print("=================")
+    print("Processing Input/" + path)
+
     syllables = 0
     words = 0
     sentences = 0
-    
-    print ("Program started")
 
     # Open text document to read with str_tok
-    file = open("test.txt", "r")
+    file = open("Input/" + path, "r", encoding="utf-8")
 
     all_words = []
     data = [] #{}
@@ -21,41 +37,50 @@ def main():
         for word in line_words:
             all_words.append(word)
 
+    #Process each word per iteration
     for nextWord in all_words:
         # Read another word, so increment words
-        words = words + 1
 
         # If there is a period, exclamation, or a question mark, increment sentences
         if (("." in nextWord) or ("!" in nextWord) or ("?" in nextWord)):
             sentences = sentences + 1
 
-        # Calculate the number of syllables and add them to syllables
-        temp_syllables = calc_syllables(nextWord)
-        data.append(temp_syllables)
-        # if not temp_syllables in data:
-        #     data[temp_syllables] = 0
-        # data[temp_syllables] += 1 
-        syllables = syllables + temp_syllables
+        # Trim any punctuation off the start of the word so it is just letters
+        while (len(nextWord) > 0 and not nextWord[0].isalpha()):#not is_vowel(nextWord[0]) and not is_consonant(nextWord[0])):
+            nextWord = nextWord[1:]
+
+        # Trim any punctuation off the end of the word so it is just letters
+        while (len(nextWord) > 0 and not nextWord[len(nextWord)-1].isalpha()):#not is_vowel(nextWord[len(nextWord)-1]) and not is_consonant(nextWord[len(nextWord)-1])):
+            nextWord = nextWord[:-1]
+
+        #If the word length is zero or if not a letter, don't count it as a word.
+        if len(nextWord) > 0:
+
+            #This if is for debugging purpose. Set a breakpoint inside
+            if not nextWord.isalpha():
+                workWithPunct = nextWord
+                
+            words = words + 1
+            # Calculate the number of syllables and add them to syllables
+            try:
+                temp_syllables = calc_syllables(nextWord)
+            except:
+                print("[!!!] calc_syllables broke on word `" + nextWord + '`')
+                traceback.print_exc(file=sys.stdout)
+            data.append(temp_syllables)
+            syllables = syllables + temp_syllables
     
     f_ind = calc_flesch(syllables, words, sentences)
-    print("The total complexity of your document with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + ".")
-    # print(data)
-    # data_arr = []
-    # xvals = []
-    # max_syl = max(data, key=int)
-    # for i in range(0, max_syl+1):
-    #     if not i in data:
-    #         data_arr.append(0)
-    #     else:
-    #         data_arr.append(data[i])
-    #     xvals.append(i)
-
+    print("The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + ".")
+    
+    #Creates the histogram
     plot.hist(data, weights=np.ones(len(data)) / len(data))
     plot.gca().yaxis.set_major_formatter(PercentFormatter(1))
 
+    #Adds labels
     plot.xlabel("Syllables")
     plot.ylabel("Percents")
-    plot.title("My awesome title")
+    plot.title("Percentage of words with n syllables in " + path)
     plot.show()
 
     # plot.plot(xvals, data_arr)
@@ -68,30 +93,18 @@ def calc_syllables(word):
     total = 0
     curr_ind = 0
 
-    #print("Word: " + word)
-
-    # Trim any punctuation off the start of the word so it is just letters
-    while (not is_vowel(word[0]) and not is_consonant(word[0])):
-        word = word[1:]
-
-    # Trim any punctuation off the end of the word so it is just letters
-    word_len = len(word)
-    while (not is_vowel(word[word_len-1]) and not is_consonant(word[word_len-1])):
-        word = word[:-1]
-        word_len = len(word)
-
     # Update the word length
     word_len = len(word)
 
-    print("Word: " + str(word))
+    if debug:
+        print("Word: " + str(word))
 
     # If the word starts with a vowel, increase the number of syllables
     if (is_vowel(word[0])):
         total = total + 1
-        #print("Found vowel")
     elif (not is_consonant(word[0])):
         # If not consonant or a vowel, it must be a number or a non-letter, and it makes sense to return 1 syllable for that imo
-        print("This shouldn't print")
+        print("This shouldn't print (If not consonant or a vowel). The word was: " + word)
         return 1
     
     # If at least 2 letters
@@ -110,21 +123,18 @@ def calc_syllables(word):
                         #total += 1
         curr_ind += 1
 
-    #if (total == 0):
-        #total += 1
-    print("Total syllables: " + str(total))
+    if debug:
+        print("Total syllables: " + str(total))
     return total
 
 def is_consonant(c):
     c = c.lower()
-    if (c == 'b' or c == 'c' or c == 'd' or c == 'f' or c == 'g' or c == 'h' or c == 'j' or c == 'k' or c == 'l' or c == 'm' or c == 'n' or c == 'p' or c == 'q' or c == 'r' or c == 's' or c == 't' or c == 'v' or c == 'w' or c == 'x' or c == 'y' or c == 'z'):
-        return True
-    return False
+    consonants = ['b' ,'c' ,'d' ,'f' ,'g' ,'h' ,'j' ,'k' ,'l' ,'m' ,'n' ,'p' ,'q' ,'r' ,'s' ,'t' ,'v' ,'w' ,'x' ,'z','y']
+    return (c in consonants)
 
 def is_vowel(c):
     c = c.lower()
-    if (c == 'a' or c == 'e' or c == 'i' or c == 'o' or c == 'u' or c == 'y'):
-        return True
-    return False
+    vowels = ['a' ,'e' ,'i' ,'o' ,'u']
+    return (c in vowels)
 
 main()
