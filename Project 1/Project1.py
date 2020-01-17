@@ -72,9 +72,12 @@ def process_file(path):
     
     f_ind = calc_flesch(syllables, words, sentences)
     print("The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + ".")
-    
+
     #Creates the histogram
-    plot.hist(data, weights=np.ones(len(data)) / len(data))
+    #plot.hist(data, range=(2,3), bins=np.arange(longest_word)-0.5, weights=np.ones(len(data)) / len(data))
+    #plot.hist(data, range=[1,max(data)], bins=np.arange((max(data)*1.5)+1)-0.5, weights=np.ones(len(data)) / len(data))
+    plot.hist(data, bins=np.arange(1,max(data)+1.5)-0.5, weights=np.ones(len(data)) / len(data))
+    plot.xticks(np.arange(min(data), max(data)+1, 1.0))
     plot.gca().yaxis.set_major_formatter(PercentFormatter(1))
 
     #Adds labels
@@ -118,23 +121,27 @@ def calc_syllables(word):
                     # Then increment the number of syllables
                     #print("Found a consonant and vowel syllable")
                     total = total + 1
-                #else:
-                    #if (word[curr_ind].lower() == 'l'):
-                        #total += 1
+                else:
+                    if (word[curr_ind].lower() == 'l'):
+                        total += 1
         curr_ind += 1
+
+    if (total < 1):
+        total = 1
 
     if debug:
         print("Total syllables: " + str(total))
+
     return total
 
 def is_consonant(c):
     c = c.lower()
-    consonants = ['b' ,'c' ,'d' ,'f' ,'g' ,'h' ,'j' ,'k' ,'l' ,'m' ,'n' ,'p' ,'q' ,'r' ,'s' ,'t' ,'v' ,'w' ,'x' ,'z','y']
+    consonants = ['b' ,'c' ,'d' ,'f' ,'g' ,'h' ,'j' ,'k' ,'l' ,'m' ,'n' ,'p' ,'q' ,'r' ,'s' ,'t' ,'v' ,'w' ,'x' ,'z']
     return (c in consonants)
 
 def is_vowel(c):
     c = c.lower()
-    vowels = ['a' ,'e' ,'i' ,'o' ,'u']
+    vowels = ['a' ,'e' ,'i' ,'o' ,'u', 'y']
     return (c in vowels)
 
 main()
