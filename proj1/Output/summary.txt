@@ -1,0 +1,2 @@
+The total complexity of GettysburgAddress.txt with 21 sentences, 274 words, and 387 syllables has a Flesch complexity of 74.10188564476886.
+The total complexity of MobyDick.txt with 8675 sentences, 208237 words, and 303807 syllables has a Flesch complexity of 59.043651679687365.

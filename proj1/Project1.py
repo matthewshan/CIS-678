@@ -1,22 +1,29 @@
 import matplotlib.pyplot as plot
 from matplotlib.ticker import PercentFormatter
 import numpy as np
-import os, sys, traceback
+import os, sys, traceback, shutil
 debug = False
 def main():
     print ("Program started")
+
+    for r, d, f in os.walk("Output/"):
+            for file_path in f:
+                os.remove("Output/" + file_path)
+
+    out_file = open("Output/summary.txt", "w", encoding="utf-8")
    
     #What this loop basically does it gets all the txt files from the Input directory and sends each through our program
     if debug: 
-        process_file("test.txt")
+        process_file("test.txt", out_file)
     else:
         for r, d, f in os.walk("Input/"):
             for file_path in f:
                 if '.txt' in file_path:
-                    process_file(file_path)    
+                    process_file(file_path, out_file)    
+    out_file.close()
 
 
-def process_file(path):
+def process_file(path, out_file):
     print("=================")
     print("Processing Input/" + path)
 
@@ -26,13 +33,13 @@ def process_file(path):
     words_in_sentence = 0
 
     # Open text document to read with str_tok
-    file = open("Input/" + path, "r", encoding="utf-8")
+    in_file = open("Input/" + path, "r", encoding="utf-8")
 
     all_words = []
-    data = [] #{}
+    data = []
     
     # Read file line by line
-    for line in file:
+    for line in in_file:
         line_words = line.split(" ")
         # Append line word by word
         for word in line_words:
@@ -73,7 +80,10 @@ def process_file(path):
             syllables = syllables + temp_syllables
     
     f_ind = calc_flesch(syllables, words, sentences)
-    print("The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + ".")
+
+    index_report = "The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + "."
+    print(index_report)
+    out_file.write(index_report+'\n')
 
     #Creates the histogram
     #plot.hist(data, range=(2,3), bins=np.arange(longest_word)-0.5, weights=np.ones(len(data)) / len(data))
@@ -86,7 +96,12 @@ def process_file(path):
     plot.xlabel("Syllables")
     plot.ylabel("Percents")
     plot.title("Percentage of words with n syllables in " + path)
-    plot.show()
+    plot.show() 
+
+    out_path = str("Output/"+path+".png")
+    plot.savefig(out_path)
+
+    in_file.close()
 
     # plot.plot(xvals, data_arr)
     # plot.show()
