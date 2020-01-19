@@ -66,7 +66,7 @@ def main():
     ax.bar(ind, avg_sents, width, color='b')
 
     ax.set_ylabel("Flesch Index vs. Average Words Per Sentence")
-    ax.set_xticks(ind+width)
+    #ax.set_xticks(ind+width)
     #ax.set_xticklabels(file_names)
     ax.legend((f_inds, avg_sents), ("Flesch Index", "Avg. Words/Sentence"))
 
