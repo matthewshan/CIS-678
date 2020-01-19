@@ -2,6 +2,8 @@ import matplotlib.pyplot as plot
 from matplotlib.ticker import PercentFormatter
 import numpy as np
 import os, sys, traceback, shutil
+from sklearn.linear_model import LinearRegression
+import pandas as pd
 debug = False
 def main():
     print ("Program started")
@@ -34,11 +36,28 @@ def main():
         f_inds.append(tup[1])
         avg_sents.append(tup[2])
 
-    print(f_inds, avg_sents, file_names)
-    
+    print(str(f_inds) + "\n" + str(avg_sents) + "\n" + str(file_names) + "\n")
+    plot.clf()
+    X = np.array(avg_sents).reshape(-1, 1)
+    Y = np.array(f_inds).reshape(-1, 1)
+    linear_regressor = LinearRegression()
+    linear_regressor.fit(X, Y)
+    Y_pred = linear_regressor.predict(X)
+
+    print("R^2:" + str(linear_regressor.score(X, Y)))
+    print("Slope (M):" + str(linear_regressor.coef_))
+    print("Y-intercept:" + str(linear_regressor.intercept_))
+
+    plot.scatter(X, Y)
+    plot.plot(X, Y_pred, color='red')
+    plot.xlabel("Average Words Per Sentence")
+    plot.ylabel("Flesch Index")
+    plot.title("Relation between Avg. Words Per Sentence and Flesch Index")
+    plot.show()
+
+    plot.clf()
     file_names = tuple(file_names)
-    
-    ind = np.arange(8)
+    ind = np.arange(len(avg_sents))
     width = 0.25
 
     fig = plot.figure()
@@ -48,7 +67,7 @@ def main():
 
     ax.set_ylabel("Flesch Index vs. Average Words Per Sentence")
     ax.set_xticks(ind+width)
-    ax.set_xtickslabels(file_names)
+    #ax.set_xticklabels(file_names)
     ax.legend((f_inds, avg_sents), ("Flesch Index", "Avg. Words/Sentence"))
 
     plot.show()
@@ -62,7 +81,6 @@ def process_file(path, out_file):
     words = 0
     sentences = 0
     words_in_sentence = 0
-    avg_sentence_len = 0
 
     # Open text document to read with str_tok
     in_file = open("Input/" + path, "r", encoding="utf-8")
@@ -88,7 +106,6 @@ def process_file(path, out_file):
         if (len(nextWord) > 1 and ((nextWord[-1] == ".") or (nextWord[-1] == "!") or (nextWord[-1] == "?"))):
             if (words_in_sentence > 0):
                 sentences = sentences + 1
-                avg_sentence_len = (avg_sentence_len + words_in_sentence) / 2
                 words_in_sentence = 0   
 
         # Trim any punctuation off the start of the word so it is just letters
@@ -122,6 +139,7 @@ def process_file(path, out_file):
     #Creates the histogram
     #plot.hist(data, range=(2,3), bins=np.arange(longest_word)-0.5, weights=np.ones(len(data)) / len(data))
     #plot.hist(data, range=[1,max(data)], bins=np.arange((max(data)*1.5)+1)-0.5, weights=np.ones(len(data)) / len(data))
+    plot.clf()
     plot.hist(data, bins=np.arange(1,max(data)+1.5)-0.5, weights=np.ones(len(data)) / len(data))
     plot.xticks(np.arange(min(data), max(data)+1, 1.0))
     plot.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -134,13 +152,13 @@ def process_file(path, out_file):
     out_path = str("Output/"+path+".png")
     plot.savefig(out_path)
 
-    plot.show() 
+    #plot.show() 
 
     in_file.close()
 
     # plot.plot(xvals, data_arr)
     # plot.show()
-    return (path, f_ind, avg_sentence_len)
+    return (path, f_ind, words/sentences)
 
 def calc_flesch(syllables, words, sentences):
     return 206.835 - (84.6 * (float(syllables) / float(words))) - (1.015 * (float(words) / float(sentences)))
