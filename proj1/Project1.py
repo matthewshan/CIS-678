@@ -23,6 +23,7 @@ def process_file(path):
     syllables = 0
     words = 0
     sentences = 0
+    words_in_sentence = 0
 
     # Open text document to read with str_tok
     file = open("Input/" + path, "r", encoding="utf-8")
@@ -41,9 +42,14 @@ def process_file(path):
     for nextWord in all_words:
         # Read another word, so increment words
 
+        if (len(nextWord) > 0 and nextWord[-1] == "\n"):
+            nextWord = nextWord[:-1]
+
         # If there is a period, exclamation, or a question mark, increment sentences
-        if (("." in nextWord) or ("!" in nextWord) or ("?" in nextWord)):
-            sentences = sentences + 1
+        if (len(nextWord) > 1 and ((nextWord[-1] == ".") or (nextWord[-1] == "!") or (nextWord[-1] == "?"))):
+            if (words_in_sentence > 0):
+                sentences = sentences + 1
+                words_in_sentence = 0   
 
         # Trim any punctuation off the start of the word so it is just letters
         while (len(nextWord) > 0 and not nextWord[0].isalpha()):#not is_vowel(nextWord[0]) and not is_consonant(nextWord[0])):
@@ -54,13 +60,9 @@ def process_file(path):
             nextWord = nextWord[:-1]
 
         #If the word length is zero or if not a letter, don't count it as a word.
-        if len(nextWord) > 0:
-
-            #This if is for debugging purpose. Set a breakpoint inside
-            if not nextWord.isalpha():
-                workWithPunct = nextWord
-                
+        if len(nextWord) > 0 and nextWord != " ":
             words = words + 1
+            words_in_sentence += 1
             # Calculate the number of syllables and add them to syllables
             try:
                 temp_syllables = calc_syllables(nextWord)
