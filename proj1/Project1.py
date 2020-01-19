@@ -12,6 +12,8 @@ def main():
 
     out_file = open("Output/summary.txt", "w", encoding="utf-8")
    
+    f_ind_arr = []
+
     #What this loop basically does it gets all the txt files from the Input directory and sends each through our program
     if debug: 
         process_file("test.txt", out_file)
@@ -19,8 +21,37 @@ def main():
         for r, d, f in os.walk("Input/"):
             for file_path in f:
                 if '.txt' in file_path:
-                    process_file(file_path, out_file)    
+                    f_ind = process_file(file_path, out_file)
+                    f_ind_arr.append(f_ind)
     out_file.close()
+
+    # Print another graph comparing the Flesch indices along with their average sentence length
+    f_inds = []
+    avg_sents = []
+    file_names = []
+    for tup in f_ind_arr:
+        file_names.append(tup[0])
+        f_inds.append(tup[1])
+        avg_sents.append(tup[2])
+
+    print(f_inds, avg_sents, file_names)
+    
+    file_names = tuple(file_names)
+    
+    ind = np.arange(8)
+    width = 0.25
+
+    fig = plot.figure()
+    ax = fig.add_subplot(111)
+    ax.bar(ind, f_inds, width, color='r')
+    ax.bar(ind, avg_sents, width, color='b')
+
+    ax.set_ylabel("Flesch Index vs. Average Words Per Sentence")
+    ax.set_xticks(ind+width)
+    ax.set_xtickslabels(file_names)
+    ax.legend((f_inds, avg_sents), ("Flesch Index", "Avg. Words/Sentence"))
+
+    plot.show()
 
 
 def process_file(path, out_file):
@@ -31,6 +62,7 @@ def process_file(path, out_file):
     words = 0
     sentences = 0
     words_in_sentence = 0
+    avg_sentence_len = 0
 
     # Open text document to read with str_tok
     in_file = open("Input/" + path, "r", encoding="utf-8")
@@ -56,6 +88,7 @@ def process_file(path, out_file):
         if (len(nextWord) > 1 and ((nextWord[-1] == ".") or (nextWord[-1] == "!") or (nextWord[-1] == "?"))):
             if (words_in_sentence > 0):
                 sentences = sentences + 1
+                avg_sentence_len = (avg_sentence_len + words_in_sentence) / 2
                 words_in_sentence = 0   
 
         # Trim any punctuation off the start of the word so it is just letters
@@ -82,6 +115,7 @@ def process_file(path, out_file):
     f_ind = calc_flesch(syllables, words, sentences)
 
     index_report = "The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + "."
+    index_report = index_report + " " + calc_grade(f_ind)
     print(index_report)
     out_file.write(index_report+'\n')
 
@@ -96,15 +130,17 @@ def process_file(path, out_file):
     plot.xlabel("Syllables")
     plot.ylabel("Percents")
     plot.title("Percentage of words with n syllables in " + path)
-    plot.show() 
 
     out_path = str("Output/"+path+".png")
     plot.savefig(out_path)
+
+    plot.show() 
 
     in_file.close()
 
     # plot.plot(xvals, data_arr)
     # plot.show()
+    return (path, f_ind, avg_sentence_len)
 
 def calc_flesch(syllables, words, sentences):
     return 206.835 - (84.6 * (float(syllables) / float(words))) - (1.015 * (float(words) / float(sentences)))
@@ -160,5 +196,21 @@ def is_vowel(c):
     c = c.lower()
     vowels = ['a' ,'e' ,'i' ,'o' ,'u', 'y']
     return (c in vowels)
+
+def calc_grade(fl_ind):
+    if (fl_ind > 90):
+        return "This text has a 5th grade reading level. It should be easily understood by an average 11-year-old student."
+    elif (fl_ind > 80):
+        return "This text has a 6th grade reading level. Easy to read, conversational english for consumers."
+    elif (fl_ind > 70):
+        return "This text has a 7th grade reading level. Fairly easy to read."
+    elif (fl_ind > 60):
+        return "This text has an 8th-9th grade reading level. Plain english, easily understoof by 13-15 year old students."
+    elif (fl_ind > 50):
+        return "This text has a 10th-12th grade reading level. Fairly difficult to read."
+    elif (fl_ind > 30):
+        return "This text has a college reading level. Difficult to read."
+    else:
+        return "This text has a college graduate reading level. Very difficult to read, best understood by university graduates."
 
 main()

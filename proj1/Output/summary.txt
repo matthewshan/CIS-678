@@ -1,2 +1,5 @@
-The total complexity of GettysburgAddress.txt with 21 sentences, 274 words, and 387 syllables has a Flesch complexity of 74.10188564476886.
-The total complexity of MobyDick.txt with 8675 sentences, 208237 words, and 303807 syllables has a Flesch complexity of 59.043651679687365.
+The total complexity of GettysburgAddress.txt with 21 sentences, 274 words, and 387 syllables has a Flesch complexity of 74.10188564476886. This text has a 7th grade reading level. Fairly easy to read.
+The total complexity of MobyDick.txt with 8675 sentences, 208237 words, and 303807 syllables has a Flesch complexity of 59.043651679687365. This text has a 10th-12th grade reading level. Fairly difficult to read.
+The total complexity of NYTimes.txt with 53 sentences, 800 words, and 1280 syllables has a Flesch complexity of 56.154245283018895. This text has a 10th-12th grade reading level. Fairly difficult to read.
+The total complexity of one and two syllables only.txt with 2 sentences, 30 words, and 40 syllables has a Flesch complexity of 78.81000000000003. This text has a 7th grade reading level. Fairly easy to read.
+The total complexity of test.txt with 6 sentences, 74 words, and 128 syllables has a Flesch complexity of 47.98153153153153. This text has a college reading level. Difficult to read.
