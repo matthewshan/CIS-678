@@ -3,8 +3,11 @@ from matplotlib.ticker import PercentFormatter
 import numpy as np
 import os, sys, traceback, shutil
 from sklearn.linear_model import LinearRegression
-import pandas as pd
+
 debug = False
+"""
+Entry point of the program
+"""
 def main():
     print ("Program started")
 
@@ -12,67 +15,120 @@ def main():
             for file_path in f:
                 os.remove("Output/" + file_path)
 
-    out_file = open("Output/summary.txt", "w", encoding="utf-8")
+    summary_file = open("Output/summary.txt", "w", encoding="utf-8")
    
-    f_ind_arr = []
+    file_results = []
 
-    #What this loop basically does it gets all the txt files from the Input directory and sends each through our program
+    #What this loop does is it gets all the txt files from the Input directory and sends each through our program
     if debug: 
-        process_file("test.txt", out_file)
+        process_file("test.txt", summary_file)
     else:
         for r, d, f in os.walk("Input/"):
             for file_path in f:
                 if '.txt' in file_path:
-                    f_ind = process_file(file_path, out_file)
-                    f_ind_arr.append(f_ind)
-    out_file.close()
+                    f_ind = process_file(file_path, summary_file)
+                    file_results.append(f_ind)
 
     # Print another graph comparing the Flesch indices along with their average sentence length
-    f_inds = []
-    avg_sents = []
     file_names = []
-    for tup in f_ind_arr:
+    f_indexs = []
+    avg_words_per_sent = []
+    avg_sylla_per_sent = []
+    
+    for tup in file_results:
         file_names.append(tup[0])
-        f_inds.append(tup[1])
-        avg_sents.append(tup[2])
-
-    print(str(f_inds) + "\n" + str(avg_sents) + "\n" + str(file_names) + "\n")
+        f_indexs.append(tup[1])
+        avg_words_per_sent.append(tup[2])
+        avg_sylla_per_sent.append(tup[3])
+    
+    """
+        Flecsh Index vs Average words per Sentance
+    """
+    #Histogram on average words per sentance
     plot.clf()
-    X = np.array(avg_sents).reshape(-1, 1)
-    Y = np.array(f_inds).reshape(-1, 1)
+    file_names = tuple(file_names)
+    ind = np.arange(len(avg_words_per_sent))
+    width = 0.25
+    fig = plot.figure()
+    ax = fig.add_subplot(111)
+    ax.bar(ind, f_indexs, width, color='r')
+    ax.bar(ind, avg_words_per_sent, width, color='b')
+    ax.set_ylabel("Flesch Index vs. Average Words Per Sentence")
+    ax.legend((f_indexs, avg_words_per_sent), ("Flesch Index", "Avg. Words/Sentence"))
+    plot.show()
+
+    #Fits our linear regression model
+    X = np.array(avg_words_per_sent).reshape(-1, 1)
+    Y = np.array(f_indexs).reshape(-1, 1)
     linear_regressor = LinearRegression()
     linear_regressor.fit(X, Y)
     Y_pred = linear_regressor.predict(X)
 
-    print("R^2:" + str(linear_regressor.score(X, Y)))
-    print("Slope (M):" + str(linear_regressor.coef_))
-    print("Y-intercept:" + str(linear_regressor.intercept_))
-
+    #Visualizes the data for our linear regression model
+    result = "\n\nFlesch Index vs Avg. Words Per Sentence\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
+    print(result)
+    summary_file.write(result)
+    plot.clf()
     plot.scatter(X, Y)
     plot.plot(X, Y_pred, color='red')
     plot.xlabel("Average Words Per Sentence")
     plot.ylabel("Flesch Index")
-    plot.title("Relation between Avg. Words Per Sentence and Flesch Index")
+    plot.title("Relation of Flesch Index vs Avg. Words Per Sentence")
+    plot.savefig("Output/Flesch Index vs Avg. Words Per Sentence.png")
     plot.show()
 
+    """
+       Flecsh Index vs Average Syllables Per Sentance
+    """
+    #Fits our linear regression model
+    X = np.array(avg_sylla_per_sent).reshape(-1, 1)
+    Y = np.array(f_indexs).reshape(-1, 1)
+    linear_regressor = LinearRegression()
+    linear_regressor.fit(X, Y)
+    Y_pred = linear_regressor.predict(X)
+
+    #Visualizes the data for our linear regression model
+    result = "\n\nFlesch Index vs Avg. Syllables Per Sentance\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
+    print(result)
+    summary_file.write(result)
     plot.clf()
-    file_names = tuple(file_names)
-    ind = np.arange(len(avg_sents))
-    width = 0.25
-
-    fig = plot.figure()
-    ax = fig.add_subplot(111)
-    ax.bar(ind, f_inds, width, color='r')
-    ax.bar(ind, avg_sents, width, color='b')
-
-    ax.set_ylabel("Flesch Index vs. Average Words Per Sentence")
-    #ax.set_xticks(ind+width)
-    #ax.set_xticklabels(file_names)
-    ax.legend((f_inds, avg_sents), ("Flesch Index", "Avg. Words/Sentence"))
-
+    plot.scatter(X, Y)
+    plot.plot(X, Y_pred, color='red')
+    plot.xlabel("Average Syllables Per Sentance")
+    plot.ylabel("Flesch Index")
+    plot.title("Relation of Flesch Index vs Avg. Syllables Per Sentance")
+    plot.savefig("Output/Flesch Index vs Avg. Syllables Per Sentance.png")
     plot.show()
 
+    """
+       Average Words per Sentance vs Average Syllables Per Sentance
+    """
+    #Fits our linear regression model
+    X = np.array(avg_sylla_per_sent).reshape(-1, 1)
+    Y = np.array(avg_words_per_sent).reshape(-1, 1)
+    linear_regressor = LinearRegression()
+    linear_regressor.fit(X, Y)
+    Y_pred = linear_regressor.predict(X)
 
+    #Visualizes the data for our linear regression model
+    result = "\n\nAvg. Words per Sentance vs Avg. Syllables Per Sentance\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
+    print(result)
+    summary_file.write(result)
+    plot.clf()
+    plot.scatter(X, Y)
+    plot.plot(X, Y_pred, color='red')
+    plot.xlabel("Average Syllables Per Sentance")
+    plot.ylabel("Average Words Per Sentance")
+    plot.title("Relation of Avg. Words Per Sentance vs Avg. Syllables Per Sentance")
+    plot.savefig("Output/Avg. Words Per Sentance vs Avg. Syllables Per Sentance.png")
+    plot.show()
+
+    summary_file.close()
+
+"""
+This method processes the file and extracts required data
+Returns (path, f_index, words/sentences, syllables/sentences)
+"""
 def process_file(path, out_file):
     print("=================")
     print("Processing Input/" + path)
@@ -129,40 +185,36 @@ def process_file(path, out_file):
             data.append(temp_syllables)
             syllables = syllables + temp_syllables
     
-    f_ind = calc_flesch(syllables, words, sentences)
+    f_index = calc_flesch(syllables, words, sentences)
 
-    index_report = "The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_ind) + "."
-    index_report = index_report + " " + calc_grade(f_ind)
-    print(index_report)
-    out_file.write(index_report+'\n')
+    file_report = "The total complexity of " + path + " with " + str(sentences) + " sentences, " + str(words) + " words, and " + str(syllables) + " syllables has a Flesch complexity of " + str(f_index) + "."
+    file_report += " " + calc_grade(f_index)
+    file_report += " Words/Sentences: " +  str(words/sentences) + ". Syllables/Sentences: " + str(syllables/sentences) + "."
+    print(file_report)
+    out_file.write(file_report+'\n')
 
-    #Creates the histogram
-    #plot.hist(data, range=(2,3), bins=np.arange(longest_word)-0.5, weights=np.ones(len(data)) / len(data))
-    #plot.hist(data, range=[1,max(data)], bins=np.arange((max(data)*1.5)+1)-0.5, weights=np.ones(len(data)) / len(data))
+    #Creates the histogram of distribution of word syllable count.
     plot.clf()
     plot.hist(data, bins=np.arange(1,max(data)+1.5)-0.5, weights=np.ones(len(data)) / len(data))
     plot.xticks(np.arange(min(data), max(data)+1, 1.0))
     plot.gca().yaxis.set_major_formatter(PercentFormatter(1))
-
-    #Adds labels
     plot.xlabel("Syllables")
     plot.ylabel("Percents")
     plot.title("Percentage of words with n syllables in " + path)
-
     out_path = str("Output/"+path+".png")
     plot.savefig(out_path)
 
-    #plot.show() 
-
     in_file.close()
-
-    # plot.plot(xvals, data_arr)
-    # plot.show()
-    return (path, f_ind, words/sentences)
-
+    return (path, f_index, words/sentences, syllables/sentences)
+"""
+    Calculates the flesch index
+"""
 def calc_flesch(syllables, words, sentences):
     return 206.835 - (84.6 * (float(syllables) / float(words))) - (1.015 * (float(words) / float(sentences)))
 
+"""
+    Calculates the number of syllables in a word
+"""
 def calc_syllables(word):
     total = 0
     curr_ind = 0
@@ -204,17 +256,25 @@ def calc_syllables(word):
         print("Total syllables: " + str(total))
 
     return total
-
+"""
+    Checks to see if a character is a consonant
+"""
 def is_consonant(c):
     c = c.lower()
     consonants = ['b' ,'c' ,'d' ,'f' ,'g' ,'h' ,'j' ,'k' ,'l' ,'m' ,'n' ,'p' ,'q' ,'r' ,'s' ,'t' ,'v' ,'w' ,'x' ,'z']
     return (c in consonants)
 
+"""
+    Checks to see if a character is a vowel
+"""
 def is_vowel(c):
     c = c.lower()
     vowels = ['a' ,'e' ,'i' ,'o' ,'u', 'y']
     return (c in vowels)
 
+"""
+    Calculates the grade level of reading from the flesch index
+"""
 def calc_grade(fl_ind):
     if (fl_ind > 90):
         return "This text has a 5th grade reading level. It should be easily understood by an average 11-year-old student."
@@ -223,7 +283,7 @@ def calc_grade(fl_ind):
     elif (fl_ind > 70):
         return "This text has a 7th grade reading level. Fairly easy to read."
     elif (fl_ind > 60):
-        return "This text has an 8th-9th grade reading level. Plain english, easily understoof by 13-15 year old students."
+        return "This text has an 8th-9th grade reading level. Plain english, easily understood by 13-15 year old students."
     elif (fl_ind > 50):
         return "This text has a 10th-12th grade reading level. Fairly difficult to read."
     elif (fl_ind > 30):
