@@ -42,9 +42,9 @@ def main():
         avg_sylla_per_sent.append(tup[3])
     
     """
-        Flecsh Index vs Average words per Sentance
+        Flecsh Index vs Average words per Sentence
     """
-    #Histogram on average words per sentance
+    #Histogram on average words per Sentence
     plot.clf()
     file_names = tuple(file_names)
     ind = np.arange(len(avg_words_per_sent))
@@ -78,7 +78,7 @@ def main():
     plot.show()
 
     """
-       Flecsh Index vs Average Syllables Per Sentance
+       Flecsh Index vs Average Syllables Per Sentence
     """
     #Fits our linear regression model
     X = np.array(avg_sylla_per_sent).reshape(-1, 1)
@@ -88,20 +88,20 @@ def main():
     Y_pred = linear_regressor.predict(X)
 
     #Visualizes the data for our linear regression model
-    result = "\n\nFlesch Index vs Avg. Syllables Per Sentance\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
+    result = "\n\nFlesch Index vs Avg. Syllables Per Sentence\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
     print(result)
     summary_file.write(result)
     plot.clf()
     plot.scatter(X, Y)
     plot.plot(X, Y_pred, color='red')
-    plot.xlabel("Average Syllables Per Sentance")
+    plot.xlabel("Average Syllables Per Sentence")
     plot.ylabel("Flesch Index")
-    plot.title("Relation of Flesch Index vs Avg. Syllables Per Sentance")
-    plot.savefig("Output/Flesch Index vs Avg. Syllables Per Sentance.png")
+    plot.title("Relation of Flesch Index vs Avg. Syllables Per Sentence")
+    plot.savefig("Output/Flesch Index vs Avg. Syllables Per Sentence.png")
     plot.show()
 
     """
-       Average Words per Sentance vs Average Syllables Per Sentance
+       Average Words per Sentence vs Average Syllables Per Sentence
     """
     #Fits our linear regression model
     X = np.array(avg_sylla_per_sent).reshape(-1, 1)
@@ -111,16 +111,16 @@ def main():
     Y_pred = linear_regressor.predict(X)
 
     #Visualizes the data for our linear regression model
-    result = "\n\nAvg. Words per Sentance vs Avg. Syllables Per Sentance\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
+    result = "\n\nAvg. Words per Sentence vs Avg. Syllables Per Sentence\nR^2:" + str(linear_regressor.score(X, Y)) + "\n" + "Slope (M):" + str(linear_regressor.coef_) + "Y-intercept:" + str(linear_regressor.intercept_) + "\n"
     print(result)
     summary_file.write(result)
     plot.clf()
     plot.scatter(X, Y)
     plot.plot(X, Y_pred, color='red')
-    plot.xlabel("Average Syllables Per Sentance")
-    plot.ylabel("Average Words Per Sentance")
-    plot.title("Relation of Avg. Words Per Sentance vs Avg. Syllables Per Sentance")
-    plot.savefig("Output/Avg. Words Per Sentance vs Avg. Syllables Per Sentance.png")
+    plot.xlabel("Average Syllables Per Sentence")
+    plot.ylabel("Average Words Per Sentence")
+    plot.title("Relation of Avg. Words Per Sentence vs Avg. Syllables Per Sentence")
+    plot.savefig("Output/Avg. Words Per Sentence vs Avg. Syllables Per Sentence.png")
     plot.show()
 
     summary_file.close()

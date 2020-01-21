@@ -56,11 +56,11 @@ R^2:0.37966015512545104
 Slope (M):[[-0.84583867]]Y-intercept:[80.82807356]
 
 
-Flesch Index vs Avg. Syllables Per Sentance
-R^2:0.5623492390206325
+Flesch Index vs Avg. Syllables Per Sentence
+R^2:0.5623492390206324
 Slope (M):[[-0.71375586]]Y-intercept:[84.83186881]
 
 
-Avg. Words per Sentance vs Avg. Syllables Per Sentance
+Avg. Words per Sentence vs Avg. Syllables Per Sentence
 R^2:0.9613732187433662
 Slope (M):[[0.67983358]]Y-intercept:[0.46383986]
