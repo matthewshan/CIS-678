@@ -19,7 +19,7 @@ def generate_next_nodes(data_set, root_node):
     if (all_same_class):
         # set val
         root_node = class_type
-        return
+        return root_node
 
     # TODO We also need to check if there are no more attributes to test
 
@@ -31,6 +31,9 @@ def generate_next_nodes(data_set, root_node):
         if (attr_gain > best_gain):
             best_gain = attr_gain
             best_attribute = attr
+    if best_attribute == '':
+        return root_node
+
     # We now know the best attribute and it's gain value, so that's our next decision
     # Now we must generate a node for each possible value of that attribute
     attr_values = meta_data["attr"][best_attribute][1]
@@ -47,7 +50,7 @@ def generate_next_nodes(data_set, root_node):
         if (len(sub_data) != 0):
             root_node[best_attribute][attr_val] = generate_next_nodes(sub_data, root_node[best_attribute][attr_val])
     # Everything should be generated at this point, so all done
-    return
+    return root_node
 
 #Calculates the entropy of the given attribute.
 #Leave blank to get the entropy of the whole set_data
@@ -71,7 +74,7 @@ def calculate_entropy(data_set, attr=None, attr_value=None):
     else:
         for cl in meta_data["classes"]:
             # Number of data of given class
-            num_cl = len(list(filter(lambda example: data_set[-1] == cl, data_set)))
+            num_cl = len(list(filter(lambda example: example[-1] == cl, data_set)))
             # Number of data with the given attr_value
             num_attr = len(data_set)
             p_cl = num_cl/num_attr
@@ -131,4 +134,5 @@ data_list = read_examples("fishing.data")
 # Read in the possible classes and attributes
 generate_metadata("fishing.data")
 decision_tree = {}
-generate_next_nodes(data_list, decision_tree)
+decision_tree = generate_next_nodes(data_list, decision_tree)
+print(decision_tree)
