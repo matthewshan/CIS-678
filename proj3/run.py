@@ -48,6 +48,10 @@ def generate_next_nodes(data_set, root_node):
         # Root --> Water --> Hot
         # Root --> Water --> Cold
         if (len(sub_data) != 0):
+            if(not best_attribute in root_node):
+                root_node[best_attribute] = {}
+            if(not attr_val in root_node[best_attribute]):
+                root_node[best_attribute][attr_val] = {}
             root_node[best_attribute][attr_val] = generate_next_nodes(sub_data, root_node[best_attribute][attr_val])
     # Everything should be generated at this point, so all done
     return root_node
@@ -61,7 +65,7 @@ def calculate_entropy(data_set, attr=None, attr_value=None):
         attr_index = meta_data["attr"][attr][0]
         for cl in meta_data["classes"]:
             # Number of data with the given attr_value and the given class
-            num_cl = len(list(filter(lambda example: example[attr_index] == attr_value and data_set[-1] == cl, data_set)))
+            num_cl = len(list(filter(lambda example: example[attr_index] == attr_value and example[-1] == cl, data_set)))
             # Number of data with the given attr_value
             num_attr = len(list(filter(lambda example: example[attr_index] == attr_value, data_set)))
             if num_attr != 0:
@@ -81,7 +85,7 @@ def calculate_entropy(data_set, attr=None, attr_value=None):
             if p_cl != 0:
                 result += p_cl * math.log2(p_cl)
             
-    return result
+    return -1 * result
         
 
 def calculate_gain(data_set, attr):
@@ -99,14 +103,14 @@ def generate_metadata(file_name):
     # Skip the first line
     my_file.readline()
     # Read in the possible classes from the second line
-    classes = my_file.readline().split(",")
+    classes = my_file.readline().strip("\n").split(",")
     meta_data["classes"] = classes
 
     # Read the third line, aka the total number of attributes
     total_attr = my_file.readline()
     # Read in each attribute and it's possible values
     for attr in range(int(total_attr)):
-        attr_values = my_file.readline().split(",")
+        attr_values = my_file.readline().strip("\n").split(",")
         meta_data["attr"][attr_values[0]] = tuple((attr, attr_values[2:]))
     my_file.close()
 
@@ -123,7 +127,7 @@ def read_examples(file_path):
         elif (total_num_lines >= 3):
             # Arrived at data section in file, so start adding lists
             # ex. [ Strong,Warm,Warm,Sunny,Yes ]
-            data_entry = line.split(",")
+            data_entry = line.strip("\n").split(",")
             data_list.append(data_entry)
     print(total_num_lines)
     file.close()

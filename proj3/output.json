@@ -1,0 +1,11 @@
+[{"Forecast": {"Sunny": {"Wind": {"Strong": "Yes", "Weak": {"Water": {"Warm": "No", "Moderate": "Yes", "Cold": "No"
+                    }
+                }
+            }
+        }, "Cloudy": "Yes", "Rainy": {"Air": {"Warm": {"Wind": {"Strong": "Yes", "Weak": "No"
+                    }
+                }, "Cool": "No"
+            }
+        }
+    }
+}]
