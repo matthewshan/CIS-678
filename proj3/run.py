@@ -18,7 +18,7 @@ def generate_next_nodes(data_set, root_node):
             all_same_class = False
     if (all_same_class):
         # set val
-        root_node = class_type
+        root_node["Value"] = class_type
         return root_node
 
     # TODO We also need to check if there are no more attributes to test
@@ -140,3 +140,32 @@ generate_metadata("fishing.data")
 decision_tree = {}
 decision_tree = generate_next_nodes(data_list, decision_tree)
 print(decision_tree)
+
+# tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
+def evaluate_data(data_entry, current_node):
+    print("Data entry: " + str(data_entry))
+    while (True):
+        attr_val = list(current_node.keys())
+        #print ("Attr_val: " + str(attr_val))
+        try:
+            attr_pos = meta_data["attr"][attr_val[0]][0]
+        except:
+            #print ("Not an attribute, reached a leaf node")
+            pass
+        for val in current_node[attr_val[0]]:
+            #print ("Val: " + str(val))
+            if (attr_val[0] == "Value"):
+                if (current_node[attr_val[0]] == "Yes"):
+                    return True
+                elif (current_node[attr_val[0]] == "No"):
+                    return False
+            else:
+                # If not at the end of the tree, progress the current_node down the correct branch
+                if (data_entry[attr_pos] == val):
+                    # At this point, just repeat the loop checking the next node
+                    current_node = current_node[attr_val[0]][val]
+        
+
+# Format is [Wind, Water, Air, Forecast]
+print(str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
+print(str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
