@@ -129,7 +129,7 @@ def read_examples(file_path):
             # ex. [ Strong,Warm,Warm,Sunny,Yes ]
             data_entry = line.strip("\n").split(",")
             data_list.append(data_entry)
-    print(total_num_lines)
+    #print(total_num_lines)
     file.close()
     return data_list
 
@@ -139,11 +139,11 @@ data_list = read_examples("fishing.data")
 generate_metadata("fishing.data")
 decision_tree = {}
 decision_tree = generate_next_nodes(data_list, decision_tree)
-print(decision_tree)
+print("\nDecision tree:\n" + str(decision_tree))
 
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
 def evaluate_data(data_entry, current_node):
-    print("Data entry: " + str(data_entry))
+    #print("Data entry: " + str(data_entry))
     while (True):
         attr_val = list(current_node.keys())
         #print ("Attr_val: " + str(attr_val))
@@ -167,5 +167,21 @@ def evaluate_data(data_entry, current_node):
         
 
 # Format is [Wind, Water, Air, Forecast]
-print(str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
-print(str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
+print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
+#print("[\"Weak\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
+#print("[\"Strong\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
+
+total_correct = 0
+total = 0
+for entry in data_list:
+    result = str(evaluate_data(entry, decision_tree))
+    resultStr = str(entry) + ": " + str(result)
+    print(resultStr)
+    if (entry[4] == "Yes" and result == "True"):
+        total_correct += 1
+    elif (entry[4] == "No" and result == "False"):
+        total_correct += 1
+    total += 1
+print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
+ratioNum = float(total_correct)/float(total)
+print("Percent correct: " + "{:.1%}".format(ratioNum))
