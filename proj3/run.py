@@ -1,3 +1,4 @@
+import random
 import math
 
 meta_data = {
@@ -144,11 +145,17 @@ def read_examples(file_path):
 data_list = read_examples("contact-lenses.data")
 generate_metadata("contact-lenses.data")
 
-#print(data_list)
-# TODO We have to account for REAL values, instead of just categorical
+# Train/test split
+random.shuffle(data_list)
+data_len = len(data_list)
+train_percent = 0.5
+split_index = int(data_len * train_percent)
+train_data = data_list[:split_index]
+test_data = data_list[split_index:]
+
 print(meta_data)
 decision_tree = {}
-decision_tree = generate_next_nodes(data_list, decision_tree)
+decision_tree = generate_next_nodes(train_data, decision_tree)
 print("\nDecision tree:\n" + str(decision_tree))
 
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
@@ -182,7 +189,7 @@ print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Ai
 
 total_correct = 0
 total = 0
-for entry in data_list:
+for entry in test_data:
     result = str(evaluate_data(entry, decision_tree))
     resultStr = str(entry) + ": " + str(result)
     print(resultStr)
