@@ -134,9 +134,19 @@ def read_examples(file_path):
     return data_list
 
 # Read in the training examples
-data_list = read_examples("fishing.data")
+#data_list = read_examples("fishing.data")
 # Read in the possible classes and attributes
-generate_metadata("fishing.data")
+#generate_metadata("fishing.data")
+
+#data_list = read_examples("iris.data")
+#generate_metadata("iris.data")
+
+data_list = read_examples("contact-lenses.data")
+generate_metadata("contact-lenses.data")
+
+#print(data_list)
+# TODO We have to account for REAL values, instead of just categorical
+print(meta_data)
 decision_tree = {}
 decision_tree = generate_next_nodes(data_list, decision_tree)
 print("\nDecision tree:\n" + str(decision_tree))
@@ -155,10 +165,9 @@ def evaluate_data(data_entry, current_node):
         for val in current_node[attr_val[0]]:
             #print ("Val: " + str(val))
             if (attr_val[0] == "Value"):
-                if (current_node[attr_val[0]] == "Yes"):
-                    return True
-                elif (current_node[attr_val[0]] == "No"):
-                    return False
+                for val in meta_data["classes"]:
+                    if (current_node[attr_val[0]] == val):
+                        return val
             else:
                 # If not at the end of the tree, progress the current_node down the correct branch
                 if (data_entry[attr_pos] == val):
@@ -177,10 +186,10 @@ for entry in data_list:
     result = str(evaluate_data(entry, decision_tree))
     resultStr = str(entry) + ": " + str(result)
     print(resultStr)
-    if (entry[4] == "Yes" and result == "True"):
-        total_correct += 1
-    elif (entry[4] == "No" and result == "False"):
-        total_correct += 1
+    total_data_attributes = len(meta_data["attr"])
+    for val in meta_data["classes"]:
+        if (entry[total_data_attributes] == val and result == val):
+            total_correct += 1
     total += 1
 print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
 ratioNum = float(total_correct)/float(total)
