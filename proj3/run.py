@@ -150,9 +150,9 @@ generate_metadata("contact-lenses.data")
 # Train/test split
 random.shuffle(data_list)
 
-print(meta_data)
+#print(meta_data)
 decision_tree = generate_next_nodes(data_list, {})
-print("\nDecision tree:\n" + str(decision_tree))
+#print("\nDecision tree:\n" + str(decision_tree))
 
 
 def create_graph(sub_tree, graph):
@@ -167,10 +167,13 @@ def create_graph(sub_tree, graph):
         node = pydot.Node(key, style="filled", fillcolor="blue")
         graph.add_node(node)
         edge = pydot.Edge(attr, key)
+        graph.add_edge(edge)
         if isinstance(list(sub_tree.values())[0], str):
             return graph 
         else:
             graph = create_graph(sub_tree[attr][key], graph)
+            edge = pydot.Edge(key, list(sub_tree[attr][key].keys())[0])
+            graph.add_edge(edge)
     return graph
         
     
