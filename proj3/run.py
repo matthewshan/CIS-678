@@ -155,39 +155,48 @@ decision_tree = generate_next_nodes(data_list, {})
 #print("\nDecision tree:\n" + str(decision_tree))
 
 count_dict = {}
-for data in meta_data["attr"].keys():
-    count_dict[data] = 0
+count_dict["attrs"] = {}
+count_dict["values"] = {}
+for attr,x in meta_data["attr"].items():
+    count_dict["attrs"][attr] = 0
+    for value in x[1]:
+        count_dict["values"][value] = 0
 count_dict["Value"] = 0
 
 def create_graph(sub_tree, graph):
     #Create attribute node
     attr = list(sub_tree.keys())[0]
-    count_dict[attr] += 1
-    count = count_dict[attr]
+    count_dict["attrs"][attr] += 1
+    count = count_dict["attrs"][attr]
     num = " (" + str(count) + ")"
     attr_node = pydot.Node(attr+num, style="filled", fillcolor="red")
     graph.add_node(attr_node)
     #Create value nodes
     for value in sub_tree[attr]:
+        count_dict["values"][value] += 1
+        count_v = count_dict["values"][value]
+        num_v = " (" + str(count_v) + ")"
         #Value nodes
-        node = pydot.Node(value+num, style="filled", fillcolor="blue")
+        node = pydot.Node(value+num_v, style="filled", fillcolor="blue")
         graph.add_node(node)
         #Edges between attribute and values
-        edge = pydot.Edge(attr+num, value+num)
+        edge = pydot.Edge(attr+num, value+num_v)
         graph.add_edge(edge)
         next_attr = list(sub_tree[attr][value].keys())[0]
 
         #Leafs
         if next_attr == "Value":
+            count_dict["Value"] += 1
+            num_n = " (" + str(count_dict["Value"]) + ")"
             value_value = list(sub_tree[attr][value].values())[0] 
-            leaf = pydot.Node(value_value+num, style="filled", fillcolor="white")
+            leaf = pydot.Node(value_value+num_n, style="filled", fillcolor="white")
             graph.add_node(leaf)
-            edge = pydot.Edge(value+num, value_value+num)
+            edge = pydot.Edge(value+num, value_value+num_n)
             graph.add_edge(edge)
         #Next subtree
         else:
             graph = create_graph(sub_tree[attr][value], graph)
-            edge = pydot.Edge(value+num, next_attr+num)
+            edge = pydot.Edge(value+num_v, next_attr+num_v)
             graph.add_edge(edge)
         """
         if isinstance(list(sub_tree.values())[0], str):
