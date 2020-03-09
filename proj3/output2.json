@@ -1,0 +1,44 @@
+{
+    "Forecast": {
+        "Sunny": {
+            "Wind": {
+                "Strong": {
+                    "Value": "Yes"
+                },
+                "Weak": {
+                    "Water": {
+                        "Warm": {
+                            "Value": "No"
+                        },
+                        "Moderate": {
+                            "Value": "Yes"
+                        },
+                        "Cold": {
+                            "Value": "No"
+                        }
+                    }
+                }
+            }
+        },
+        "Cloudy": {
+            "Value": "Yes"
+        },
+        "Rainy": {
+            "Air": {
+                "Warm": {
+                    "Wind": {
+                        "Strong": {
+                            "Value": "Yes"
+                        },
+                        "Weak": {
+                            "Value": "No"
+                        }
+                    }
+                },
+                "Cool": {
+                    "Value": "No"
+                }
+            }
+        }
+    }
+}

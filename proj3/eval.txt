@@ -1,0 +1,46 @@
+
+"""
+# tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
+def evaluate_data(data_entry, current_node):
+    #print("Data entry: " + str(data_entry))
+    while (True):
+        attr_val = list(current_node.keys())
+        #print ("Attr_val: " + str(attr_val))
+        try:
+            attr_pos = meta_data["attr"][attr_val[0]][0]
+        except:
+            #print ("Not an attribute, reached a leaf node")
+            pass
+        for val in current_node[attr_val[0]]:
+            #print ("Val: " + str(val))
+            if (attr_val[0] == "Value"):
+                for val in meta_data["classes"]:
+                    if (current_node[attr_val[0]] == val):
+                        return val
+            else:
+                # If not at the end of the tree, progress the current_node down the correct branch
+                if (data_entry[attr_pos] == val):
+                    # At this point, just repeat the loop checking the next node
+                    current_node = current_node[attr_val[0]][val]
+        
+
+# Format is [Wind, Water, Air, Forecast]
+print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
+#print("[\"Weak\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
+#print("[\"Strong\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
+
+total_correct = 0
+total = 0
+for entry in test_data:
+    result = str(evaluate_data(entry, decision_tree))
+    resultStr = str(entry) + ": " + str(result)
+    print(resultStr)
+    total_data_attributes = len(meta_data["attr"])
+    for val in meta_data["classes"]:
+        if (entry[total_data_attributes] == val and result == val):
+            total_correct += 1
+    total += 1
+print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
+ratioNum = float(total_correct)/float(total)
+print("Percent correct: " + "{:.1%}".format(ratioNum))
+"""

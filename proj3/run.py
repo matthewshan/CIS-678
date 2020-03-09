@@ -144,8 +144,8 @@ def read_examples(file_path):
 #data_list = read_examples("iris.data")
 #generate_metadata("iris.data")
 
-data_list = read_examples("contact-lenses.data")
-generate_metadata("contact-lenses.data")
+data_list = read_examples("fishing.data")
+generate_metadata("fishing.data")
 
 # Train/test split
 random.shuffle(data_list)
@@ -154,26 +154,51 @@ random.shuffle(data_list)
 decision_tree = generate_next_nodes(data_list, {})
 #print("\nDecision tree:\n" + str(decision_tree))
 
+count_dict = {}
+for data in meta_data["attr"].keys():
+    count_dict[data] = 0
+count_dict["Value"] = 0
 
 def create_graph(sub_tree, graph):
     #Create attribute node
     attr = list(sub_tree.keys())[0]
-    attr_node = pydot.Node(attr, style="filled", fillcolor="red")
+    count_dict[attr] += 1
+    num = " (" + str(count_dict[attr]) + ")"
+    attr_node = pydot.Node(attr+num, style="filled", fillcolor="red")
     graph.add_node(attr_node)
-
-    leaf_flag = False
     #Create value nodes
-    for key in sub_tree[attr]:
-        node = pydot.Node(key, style="filled", fillcolor="blue")
+    for value in sub_tree[attr]:
+        #Value nodes
+        node = pydot.Node(value+num, style="filled", fillcolor="blue")
         graph.add_node(node)
-        edge = pydot.Edge(attr, key)
+        #Edges between attribute and values
+        edge = pydot.Edge(attr+num, value+num)
         graph.add_edge(edge)
+        next_attr = list(sub_tree[attr][value].keys())[0]
+
+        #Leafs
+        if next_attr == "Value":
+            value_value = list(sub_tree[attr][value].values())[0] 
+            count_dict["Value"] += 1
+            num = " (" + str(count_dict["Value"]) + ")"
+            leaf = pydot.Node(value_value+num, style="filled", fillcolor="white")
+            graph.add_node(leaf)
+            edge = pydot.Edge(value+num, value_value+num)
+            graph.add_edge(edge)
+        #Next subtree
+        else:
+            graph = create_graph(sub_tree[attr][value], graph)
+            edge = pydot.Edge(value+num, next_attr+num)
+            graph.add_edge(edge)
+            return graph
+        """
         if isinstance(list(sub_tree.values())[0], str):
             return graph 
         else:
-            graph = create_graph(sub_tree[attr][key], graph)
-            edge = pydot.Edge(key, list(sub_tree[attr][key].keys())[0])
+            graph = create_graph(sub_tree[attr][value], graph)
+            edge = pydot.Edge(value, list(sub_tree[attr][value].keys())[0])
             graph.add_edge(edge)
+        """
     return graph
         
     
@@ -183,50 +208,4 @@ graph = create_graph(decision_tree, graph)
 
 pic_graph = Image(graph.create_png())
 print(decision_tree)
-#display(pic_graph)
-
-"""
-# tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
-def evaluate_data(data_entry, current_node):
-    #print("Data entry: " + str(data_entry))
-    while (True):
-        attr_val = list(current_node.keys())
-        #print ("Attr_val: " + str(attr_val))
-        try:
-            attr_pos = meta_data["attr"][attr_val[0]][0]
-        except:
-            #print ("Not an attribute, reached a leaf node")
-            pass
-        for val in current_node[attr_val[0]]:
-            #print ("Val: " + str(val))
-            if (attr_val[0] == "Value"):
-                for val in meta_data["classes"]:
-                    if (current_node[attr_val[0]] == val):
-                        return val
-            else:
-                # If not at the end of the tree, progress the current_node down the correct branch
-                if (data_entry[attr_pos] == val):
-                    # At this point, just repeat the loop checking the next node
-                    current_node = current_node[attr_val[0]][val]
-        
-
-# Format is [Wind, Water, Air, Forecast]
-print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
-#print("[\"Weak\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
-#print("[\"Strong\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
-
-total_correct = 0
-total = 0
-for entry in test_data:
-    result = str(evaluate_data(entry, decision_tree))
-    resultStr = str(entry) + ": " + str(result)
-    print(resultStr)
-    total_data_attributes = len(meta_data["attr"])
-    for val in meta_data["classes"]:
-        if (entry[total_data_attributes] == val and result == val):
-            total_correct += 1
-    total += 1
-print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
-ratioNum = float(total_correct)/float(total)
-print("Percent correct: " + "{:.1%}".format(ratioNum))
-"""
+display(pic_graph)
