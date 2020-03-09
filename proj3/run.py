@@ -163,7 +163,8 @@ def create_graph(sub_tree, graph):
     #Create attribute node
     attr = list(sub_tree.keys())[0]
     count_dict[attr] += 1
-    num = " (" + str(count_dict[attr]) + ")"
+    count = count_dict[attr]
+    num = " (" + str(count) + ")"
     attr_node = pydot.Node(attr+num, style="filled", fillcolor="red")
     graph.add_node(attr_node)
     #Create value nodes
@@ -179,8 +180,6 @@ def create_graph(sub_tree, graph):
         #Leafs
         if next_attr == "Value":
             value_value = list(sub_tree[attr][value].values())[0] 
-            count_dict["Value"] += 1
-            num = " (" + str(count_dict["Value"]) + ")"
             leaf = pydot.Node(value_value+num, style="filled", fillcolor="white")
             graph.add_node(leaf)
             edge = pydot.Edge(value+num, value_value+num)
@@ -190,7 +189,6 @@ def create_graph(sub_tree, graph):
             graph = create_graph(sub_tree[attr][value], graph)
             edge = pydot.Edge(value+num, next_attr+num)
             graph.add_edge(edge)
-            return graph
         """
         if isinstance(list(sub_tree.values())[0], str):
             return graph 
