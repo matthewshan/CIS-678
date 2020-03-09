@@ -182,7 +182,8 @@ graph = pydot.Dot(graph_type="digraph")
 graph = create_graph(decision_tree, graph)
 
 pic_graph = Image(graph.create_png())
-display(pic_graph)
+print(decision_tree)
+#display(pic_graph)
 
 """
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
