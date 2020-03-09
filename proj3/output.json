@@ -1,7 +1,8 @@
 {
-    "tear-rate": {
-        "reduced": {
-            "Value": "none"
+    "tear-rate": { --ATTR--
+        "reduced": {    
+            "Value":
+                "none"
         },
         "normal": {
             "astigmatism": {

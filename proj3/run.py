@@ -144,8 +144,8 @@ def read_examples(file_path):
 #data_list = read_examples("iris.data")
 #generate_metadata("iris.data")
 
-data_list = read_examples("contact-lenses.data")
-generate_metadata("contact-lenses.data")
+data_list = read_examples("fishing.data")
+generate_metadata("fishing.data")
 
 # Train/test split
 random.shuffle(data_list)
@@ -155,25 +155,44 @@ decision_tree = generate_next_nodes(data_list, {})
 #print("\nDecision tree:\n" + str(decision_tree))
 
 
-def create_graph(sub_tree, graph):
-    #Create attribute node
-    attr = list(sub_tree.keys())[0]
-    attr_node = pydot.Node(attr, style="filled", fillcolor="red")
-    graph.add_node(attr_node)
+count_dict = {}
 
-    leaf_flag = False
+for data in meta_data["attr"].keys():
+    count_dict[data] = 0
+count_dict["Value"] = 0
+
+def create_graph(sub_tree, graph):
+    
+    #Create the first attribute node
+    attr = list(sub_tree.keys())[0]
+    count_dict[attr] += 1
+    if attr != "Value":
+        attr_node = pydot.Node(attr + " (" + str(count_dict[attr]) + ")" , style="filled", fillcolor="red")
+        graph.add_node(attr_node)
+        
+
+
     #Create value nodes
-    for key in sub_tree[attr]:
-        node = pydot.Node(key, style="filled", fillcolor="blue")
-        graph.add_node(node)
-        edge = pydot.Edge(attr, key)
-        graph.add_edge(edge)
+    for value in sub_tree[attr]:
         if isinstance(list(sub_tree.values())[0], str):
+            leaf = pydot.Node(list(sub_tree.values())[0], style="filled", fillcolor="white")
             return graph 
-        else:
-            graph = create_graph(sub_tree[attr][key], graph)
-            edge = pydot.Edge(key, list(sub_tree[attr][key].keys())[0])
-            graph.add_edge(edge)
+        #Creates the selected value node
+        node = pydot.Node(attr + ": " + value + " (" + str(count_dict[attr]) + ")", style="filled", fillcolor="blue")
+        graph.add_node(node)
+        #Creates an edge from the attribute node to this particular value
+        edge = pydot.Edge(attr + " (" + str(count_dict[attr]) + ")", attr + ":" + value + " (" + str(count_dict[attr]) + ")")
+        graph.add_edge(edge)
+
+        if attr == "Value":
+            attr_node = pydot.Node(list(sub_tree.values())[0] + " (" + str(count_dict[attr]) + ")" , style="filled", fillcolor="red")
+            graph.add_node(attr_node)
+            return graph
+
+        #Creates the subtree under and connects it 
+        graph = create_graph(sub_tree[attr][value], graph)
+        edge = pydot.Edge(attr + ": " + value + " (" + str(count_dict[attr]) + ")", list(sub_tree[attr][value].keys())[0] + " (" + str(count_dict[attr]) + ")")
+        graph.add_edge(edge)
     return graph
         
     
@@ -183,7 +202,7 @@ graph = create_graph(decision_tree, graph)
 
 pic_graph = Image(graph.create_png())
 print(decision_tree)
-#display(pic_graph)
+display(pic_graph)
 
 """
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
