@@ -1,5 +1,7 @@
 import random
 import math
+import pydot
+from IPython.display import Image, display
 
 meta_data = {
     "classes": [],
@@ -147,17 +149,39 @@ generate_metadata("contact-lenses.data")
 
 # Train/test split
 random.shuffle(data_list)
-data_len = len(data_list)
-train_percent = 0.5
-split_index = int(data_len * train_percent)
-train_data = data_list[:split_index]
-test_data = data_list[split_index:]
 
 print(meta_data)
-decision_tree = {}
-decision_tree = generate_next_nodes(train_data, decision_tree)
+decision_tree = generate_next_nodes(data_list, {})
 print("\nDecision tree:\n" + str(decision_tree))
 
+
+def create_graph(sub_tree, graph):
+    #Create attribute node
+    attr = list(sub_tree.keys())[0]
+    attr_node = pydot.Node(attr, style="filled", fillcolor="red")
+    graph.add_node(attr_node)
+
+    leaf_flag = False
+    #Create value nodes
+    for key in sub_tree[attr]:
+        node = pydot.Node(key, style="filled", fillcolor="blue")
+        graph.add_node(node)
+        edge = pydot.Edge(attr, key)
+        if isinstance(list(sub_tree.values())[0], str):
+            return graph 
+        else:
+            graph = create_graph(sub_tree[attr][key], graph)
+    return graph
+        
+    
+graph = pydot.Dot(graph_type="digraph")
+
+graph = create_graph(decision_tree, graph)
+
+pic_graph = Image(graph.create_png())
+display(pic_graph)
+
+"""
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
 def evaluate_data(data_entry, current_node):
     #print("Data entry: " + str(data_entry))
@@ -201,3 +225,4 @@ for entry in test_data:
 print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
 ratioNum = float(total_correct)/float(total)
 print("Percent correct: " + "{:.1%}".format(ratioNum))
+"""
