@@ -144,8 +144,16 @@ def read_examples(file_path):
 #data_list = read_examples("iris.data")
 #generate_metadata("iris.data")
 
-data_list = read_examples("fishing.data")
-generate_metadata("fishing.data")
+data_list = read_examples("contact-lenses.data")
+generate_metadata("contact-lenses.data")
+
+# Train/test split
+random.shuffle(data_list)
+data_len = len(data_list)
+train_percent = 0.5
+split_index = int(data_len * train_percent)
+train_data = data_list[:split_index]
+test_data = data_list[split_index:]
 
 # Train/test split
 random.shuffle(data_list)
@@ -169,7 +177,7 @@ def create_graph(sub_tree, graph):
     count_dict["attrs"][attr] += 1
     count = count_dict["attrs"][attr]
     num = " (" + str(count) + ")"
-    attr_node = pydot.Node(attr+num, style="filled", fillcolor="red")
+    attr_node = pydot.Node(attr+num, style="filled", fillcolor="#fc0367")
     graph.add_node(attr_node)
     #Create value nodes
     for value in sub_tree[attr]:
@@ -177,7 +185,7 @@ def create_graph(sub_tree, graph):
         count_v = count_dict["values"][value]
         num_v = " (" + str(count_v) + ")"
         #Value nodes
-        node = pydot.Node(value+num_v, style="filled", fillcolor="blue")
+        node = pydot.Node(value+num_v, style="filled", fillcolor="#03fcd3")
         graph.add_node(node)
         #Edges between attribute and values
         edge = pydot.Edge(attr+num, value+num_v)
@@ -195,8 +203,8 @@ def create_graph(sub_tree, graph):
             graph.add_edge(edge)
         #Next subtree
         else:
-            graph = create_graph(sub_tree[attr][value], graph)
-            edge = pydot.Edge(value+num_v, next_attr+num_v)
+            graph, next_num = create_graph(sub_tree[attr][value], graph)
+            edge = pydot.Edge(value+num_v, next_attr+next_num) #TODO: The second edge needs fixing
             graph.add_edge(edge)
         """
         if isinstance(list(sub_tree.values())[0], str):
@@ -206,13 +214,57 @@ def create_graph(sub_tree, graph):
             edge = pydot.Edge(value, list(sub_tree[attr][value].keys())[0])
             graph.add_edge(edge)
         """
-    return graph
+    return graph, num
         
     
 graph = pydot.Dot(graph_type="digraph")
 
-graph = create_graph(decision_tree, graph)
+graph, _ = create_graph(decision_tree, graph)
 
 pic_graph = Image(graph.create_png())
 print(decision_tree)
 display(pic_graph)
+
+
+
+# tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
+def evaluate_data(data_entry, current_node):
+    #print("Data entry: " + str(data_entry))
+    while (True):
+        attr_val = list(current_node.keys())
+        #print ("Attr_val: " + str(attr_val))
+        try:
+            attr_pos = meta_data["attr"][attr_val[0]][0]
+        except:
+            #print ("Not an attribute, reached a leaf node")
+            pass
+        for val in current_node[attr_val[0]]:
+            #print ("Val: " + str(val))
+            if (attr_val[0] == "Value"):
+                for val in meta_data["classes"]:
+                    if (current_node[attr_val[0]] == val):
+                        return val
+            else:
+                # If not at the end of the tree, progress the current_node down the correct branch
+                if (data_entry[attr_pos] == val):
+                    # At this point, just repeat the loop checking the next node
+                    current_node = current_node[attr_val[0]][val]
+        
+# Format is [Wind, Water, Air, Forecast]
+print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
+#print("[\"Weak\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
+#print("[\"Strong\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
+total_correct = 0
+total = 0
+for entry in test_data:
+    result = str(evaluate_data(entry, decision_tree))
+    resultStr = str(entry) + ": " + str(result)
+    print(resultStr)
+    total_data_attributes = len(meta_data["attr"])
+    for val in meta_data["classes"]:
+        if (entry[total_data_attributes] == val and result == val):
+            total_correct += 1
+    total += 1
+print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
+ratioNum = float(total_correct)/float(total)
+print("Percent correct: " + "{:.1%}".format(ratioNum))
