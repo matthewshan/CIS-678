@@ -24,8 +24,6 @@ def generate_next_nodes(data_set, root_node):
         root_node["Value"] = class_type
         return root_node
 
-    # TODO We also need to check if there are no more attributes to test
-
     # Otherwise, we're going to generate our next decision node
     best_attribute = ""
     best_gain = 0.0
@@ -122,7 +120,6 @@ def read_examples(file_path):
     data_list = []
     file = open(file_path)
     for line in file:
-        #print (line)
         # Skip the lines until you find the 3rd only-number line.
         if (len(line) < 5):
             total_num_lines += 1
@@ -132,13 +129,10 @@ def read_examples(file_path):
             # ex. [ Strong,Warm,Warm,Sunny,Yes ]
             data_entry = line.strip("\n").split(",")
             data_list.append(data_entry)
-    #print(total_num_lines)
     file.close()
     return data_list
 
-# Read in the training examples
 #data_list = read_examples("fishing.data")
-# Read in the possible classes and attributes
 #generate_metadata("fishing.data")
 
 #data_list = read_examples("iris.data")
@@ -158,9 +152,7 @@ test_data = data_list[split_index:]
 # Train/test split
 random.shuffle(data_list)
 
-#print(meta_data)
 decision_tree = generate_next_nodes(data_list, {})
-#print("\nDecision tree:\n" + str(decision_tree))
 
 count_dict = {}
 count_dict["attrs"] = {}
@@ -206,14 +198,6 @@ def create_graph(sub_tree, graph):
             graph, next_num = create_graph(sub_tree[attr][value], graph)
             edge = pydot.Edge(value+num_v, next_attr+next_num) #TODO: The second edge needs fixing
             graph.add_edge(edge)
-        """
-        if isinstance(list(sub_tree.values())[0], str):
-            return graph 
-        else:
-            graph = create_graph(sub_tree[attr][value], graph)
-            edge = pydot.Edge(value, list(sub_tree[attr][value].keys())[0])
-            graph.add_edge(edge)
-        """
     return graph, num
         
     
@@ -221,25 +205,19 @@ graph = pydot.Dot(graph_type="digraph")
 
 graph, _ = create_graph(decision_tree, graph)
 
-pic_graph = Image(graph.create_png())
-print(decision_tree)
-display(pic_graph)
-
-
+#pic_graph = Image(graph.create_png())
+#print(decision_tree)
+#display(pic_graph)
 
 # tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
 def evaluate_data(data_entry, current_node):
-    #print("Data entry: " + str(data_entry))
     while (True):
         attr_val = list(current_node.keys())
-        #print ("Attr_val: " + str(attr_val))
         try:
             attr_pos = meta_data["attr"][attr_val[0]][0]
         except:
-            #print ("Not an attribute, reached a leaf node")
             pass
         for val in current_node[attr_val[0]]:
-            #print ("Val: " + str(val))
             if (attr_val[0] == "Value"):
                 for val in meta_data["classes"]:
                     if (current_node[attr_val[0]] == val):
@@ -252,8 +230,6 @@ def evaluate_data(data_entry, current_node):
         
 # Format is [Wind, Water, Air, Forecast]
 print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
-#print("[\"Weak\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Weak", "Warm", "Warm", "Sunny"], decision_tree)))
-#print("[\"Strong\", \"Warm\", \"Warm\", \"Sunny\"]: " + str(evaluate_data(["Strong", "Warm", "Warm", "Sunny"], decision_tree)))
 total_correct = 0
 total = 0
 for entry in test_data:
@@ -268,3 +244,26 @@ for entry in test_data:
 print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
 ratioNum = float(total_correct)/float(total)
 print("Percent correct: " + "{:.1%}".format(ratioNum))
+
+
+# meta_data = {
+#     "classes": [],
+#     "attr": {
+#         # "wind": (0, ["Strong", "Weak"])
+#     }
+# }
+
+while True:
+    print("===Enter your own data===")
+    entry = []
+    for attr, values in meta_data["attr"].items():
+        print("Options: " + str(values[1]))
+        user_input = None
+        while user_input not in values[1]:
+            user_input = input(attr+"? ")
+        entry.append(user_input)
+        print("\n")
+    result = str(evaluate_data(entry, decision_tree))
+    print("Result: " + result)
+
+    
