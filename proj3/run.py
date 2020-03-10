@@ -3,6 +3,7 @@ import math
 import pydot
 from IPython.display import Image, display
 
+#Dictionary that holds the meta data
 meta_data = {
     "classes": [],
     "attr": {
@@ -10,6 +11,7 @@ meta_data = {
     }
 }
 
+#Method that helps generate the decision tree
 def generate_next_nodes(data_set, root_node):
     # Check and see if we can set a value for our root node, ie. stop recursively calling
     all_same_class = True
@@ -72,7 +74,7 @@ def calculate_entropy(data_set, attr=None, attr_value=None):
             if num_attr != 0:
                 p_cl = num_cl/num_attr
             else:
-                p_cl = 0 #Unsure?
+                p_cl = 0
             if p_cl != 0:
                 result += p_cl * math.log2(p_cl)
     #Entropy of ALL the data
@@ -88,7 +90,7 @@ def calculate_entropy(data_set, attr=None, attr_value=None):
             
     return -1 * result
         
-
+# Calculates the gain based on the data set and the given attribute
 def calculate_gain(data_set, attr):
     result = calculate_entropy(data_set)
     attr_index = meta_data["attr"][attr][0]
@@ -98,7 +100,7 @@ def calculate_gain(data_set, attr):
         result -= (len_value/len_set) * calculate_entropy(data_set, attr, value)
     return result
         
-
+#Generates the metadata file
 def generate_metadata(file_name):
     my_file = open(file_name)
     # Skip the first line
@@ -115,6 +117,7 @@ def generate_metadata(file_name):
         meta_data["attr"][attr_values[0]] = tuple((attr, attr_values[2:]))
     my_file.close()
 
+#Reads in the data examples
 def read_examples(file_path):
     total_num_lines = 0
     data_list = []
@@ -149,11 +152,10 @@ split_index = int(data_len * train_percent)
 train_data = data_list[:split_index]
 test_data = data_list[split_index:]
 
-# Train/test split
-random.shuffle(data_list)
-
+#Creates the decision tree
 decision_tree = generate_next_nodes(data_list, {})
 
+#Dictionarys used for the graphics
 count_dict = {}
 count_dict["attrs"] = {}
 count_dict["values"] = {}
@@ -163,6 +165,7 @@ for attr,x in meta_data["attr"].items():
         count_dict["values"][value] = 0
 count_dict["Value"] = 0
 
+# Method to create the graphics for the decision tree
 def create_graph(sub_tree, graph):
     #Create attribute node
     attr = list(sub_tree.keys())[0]
@@ -200,16 +203,15 @@ def create_graph(sub_tree, graph):
             graph.add_edge(edge)
     return graph, num
         
-    
 graph = pydot.Dot(graph_type="digraph")
-
 graph, _ = create_graph(decision_tree, graph)
 
+#Creates the graphic as an image
 #pic_graph = Image(graph.create_png())
 #print(decision_tree)
 #display(pic_graph)
 
-# tree = {"forecast": {"sunny": {True}, "rainy": {False} } }
+# Method that evaluates the data
 def evaluate_data(data_entry, current_node):
     while (True):
         attr_val = list(current_node.keys())
@@ -228,8 +230,7 @@ def evaluate_data(data_entry, current_node):
                     # At this point, just repeat the loop checking the next node
                     current_node = current_node[attr_val[0]][val]
         
-# Format is [Wind, Water, Air, Forecast]
-print("\n|---------- Evaluation Examples ----------|\nFormat is [Wind, Water, Air, Forecast, Result]: Prediction\n")
+# Evaluate the data
 total_correct = 0
 total = 0
 for entry in test_data:
@@ -245,14 +246,7 @@ print("Total correct: " + str(total_correct) + "/" + str(total) + ".")
 ratioNum = float(total_correct)/float(total)
 print("Percent correct: " + "{:.1%}".format(ratioNum))
 
-
-# meta_data = {
-#     "classes": [],
-#     "attr": {
-#         # "wind": (0, ["Strong", "Weak"])
-#     }
-# }
-
+# Allows the user to input their own data
 while True:
     print("===Enter your own data===")
     entry = []
