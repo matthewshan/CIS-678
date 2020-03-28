@@ -21,6 +21,7 @@ class Node:
         self.isTop = False
         # Whether this is a bias node or not
         self.isBias = False
+        self.greetedKids = False
 
     @staticmethod
     def sigmoid(z):
@@ -77,11 +78,13 @@ class Node:
 
     # Let every child know this node is it's parent
     def sayHiToTheKids(self):
-        for child in self.children:
-            # Let the child know their parent, and the weight between them
-            child[0].sayHiToDad(self, child[1])
-            child[0].sayHiToTheKids()
-    
+        if (not self.greetedKids):
+            for child in self.children:
+                # Let the child know their parent, and the weight between them
+                child[0].sayHiToDad(self, child[1])
+                child[0].sayHiToTheKids()
+        greetedKids = True
+        
     # Learn a node is a parent, as well as the weight to them
     def sayHiToDad(self, parentNode, weight):
         self.parents.append([parentNode, weight])
@@ -104,10 +107,10 @@ class NeuralNet():
 
         lastLayer = self.topNodes
 
-        rows_sizes = rows_sizes[1:-1]        
+        rows_sizes = rows_sizes[1:]        
         for num, rowSize in enumerate(rows_sizes):
             nextRow = []
-            lastRow = (num == TOTAL_ROWS - 2)
+            lastRow = (num == TOTAL_ROWS - 1)
 
             # Generate the bias node
             biasNode = Node()
@@ -134,7 +137,7 @@ class NeuralNet():
 
     def train(self, inputs, expected):
         # Take this list of [0, 0, 4, 1]
-        if (len(inputs) != len(self.leafNodes)-1):
+        if (len(inputs) != len(self.leafNodes)):
             raise ValueError
         # Set the 4 leaf nodes to 0, 0, 4, and 1 (not forgetting the bias node)
         for i in range(1, len(self.leafNodes)):
@@ -150,7 +153,7 @@ class NeuralNet():
             topNode.learn()
 
     def test(self, inputs):
-        if (len(inputs) != len(self.leafNodes)-1):
+        if (len(inputs) != len(self.leafNodes)):
             raise ValueError
         
         for i in range(1, len(self.leafNodes)):
@@ -197,15 +200,16 @@ def process_test(inputs):
 
 def weather():
     read_examples("fishingNN.data")
-    network = NeuralNet([1, 3, 5, total_attributes])
-    for example in data_entries:
-        expected = example[-1]
-        if (expected == "Yes"):
-            expected = [1]
-        else:
-            #print(expected)
-            expected = [0]
-        network.train(example[:-1], expected)
+    network = NeuralNet([1, 10, 7, total_attributes])
+    for _ in range(1):
+        for example in data_entries:
+            expected = example[-1]
+            if (expected == "Yes"):
+                expected = [1]
+            else:
+                #print(expected)
+                expected = [0]
+            network.train(example[:-1], expected)
 
     test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
     print(network.test(test_data))

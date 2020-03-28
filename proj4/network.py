@@ -41,25 +41,26 @@ class Network():
         self.layers[layer_index].errors = output_error_list
         
         #Now figure out the errors for each layer
-        for layer in range():
+        for layer in range(len(self.layesr)-2, 0, -1 ):
+            
 
         
-        self.back_propogate_hidden(list_of_outputs[0:-1], list_of_errors, layer_index)
+    #     self.back_propogate_hidden(list_of_outputs[0:-1], list_of_errors, layer_index)
 
 
-    def back_propogate_hidden(self, list_of_outputs, list_of_errors, layer_index):
-        temp = 0
-        layer = self.layers[layer_index]
-        next_errors = [] 
-        for i in layer.num_neurons:
+    # def back_propogate_hidden(self, list_of_outputs, list_of_errors, layer_index):
+    #     temp = 0
+    #     layer = self.layers[layer_index]
+    #     next_errors = [] 
+    #     for i in layer.num_neurons:
             
-            for k, error in enumerate(output_error_list):
+    #         for k, error in enumerate(output_error_list):
                 
 
     
-        # layer_index = len(self.layers) - 1
-        # current_layer = self.layers[layer_index]
-        # # list_of_outputs[layer_index][i] == h sub i
+    #     # layer_index = len(self.layers) - 1
+    #     # current_layer = self.layers[layer_index]
+    #     # # list_of_outputs[layer_index][i] == h sub i
        
     
     def learn(self, error_list):
