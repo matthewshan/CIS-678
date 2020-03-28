@@ -2,7 +2,7 @@ import random, math
 
 data_entries = []
 # The learning rate for the learn method
-LEARNING_RATE = 0.05
+LEARNING_RATE = 0.5
 
 class Node:
     def __init__(self):
@@ -56,7 +56,7 @@ class Node:
             # We need to sum all the parent's error values (thus why the top nodes must be processed first), 
             # as well as the value of the weight between this node and the parent node. 
             for parent in self.parents:
-                sum += parent[1] * parent.error
+                sum += parent[1] * parent[0].error
             self.error = sum * self.value * (1 - self.value)
             for child in self.children:
                 child[0].backProp()
@@ -99,6 +99,7 @@ class NeuralNet():
         for _ in range(output_nuerons):
             # TOPNODE should be true
             newNode = Node()
+            newNode.isTop = True
             self.topNodes.append(newNode)
 
         lastLayer = self.topNodes
@@ -106,13 +107,12 @@ class NeuralNet():
         rows_sizes = rows_sizes[1:-1]        
         for num, rowSize in enumerate(rows_sizes):
             nextRow = []
-            lastRow = False
-            if (num == TOTAL_ROWS - 1):
-                lastRow = True
+            lastRow = (num == TOTAL_ROWS - 2)
 
             # Generate the bias node
             biasNode = Node()
             biasNode.value = 1
+            biasNode.isBias = True
             nextRow.append(biasNode)
 
             # Generate the neurons of the row
@@ -172,7 +172,7 @@ def read_examples(file_path):
         entry = line.strip("\n").split(",")
         # by index, assign each attribute value a numerical value based on the order it was first encountered
         for index, attributeVal in enumerate(entry[:-1]):
-            if (index > len(listOfDicts) and attributeVal in listOfDicts[index]):
+            if (index in listOfDicts and attributeVal in listOfDicts[index]):
                 # If it's already been encountered, translate the attribute to the value it received
                 entry[index] = listOfDicts[index][attributeVal]
             else:
@@ -191,7 +191,7 @@ def read_examples(file_path):
 
 def process_test(inputs):
     result = []
-    for i, data in inputs:
+    for i, data in enumerate(inputs):
         result.append(listOfDicts[i][data])
     return result
 
@@ -206,6 +206,12 @@ def weather():
             #print(expected)
             expected = [0]
         network.train(example[:-1], expected)
+
+    test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
+    print(network.test(test_data))
+
+    test_data = process_test(["Strong", "Warm", "Warm", "Rainy"])
+    print(network.test(test_data))
 
     test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
     print(network.test(test_data))
