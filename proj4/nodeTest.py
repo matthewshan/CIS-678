@@ -77,10 +77,10 @@ class Node:
 
     # Let every child know this node is it's parent
     def sayHiToTheKids(self):
-        for child in children:
+        for child in self.children:
             # Let the child know their parent, and the weight between them
-            child[0].sayHiToDad(self, child[0].getValue(), child[1])
-            child[0].sayHiToTheKids(self)
+            child[0].sayHiToDad(self, child[1])
+            child[0].sayHiToTheKids()
     
     # Learn a node is a parent, as well as the weight to them
     def sayHiToDad(self, parentNode, weight):
@@ -103,7 +103,7 @@ class NeuralNet():
 
         lastLayer = self.topNodes
 
-        row_sizes = rows_sizes[1:-1]        
+        rows_sizes = rows_sizes[1:-1]        
         for num, rowSize in enumerate(rows_sizes):
             nextRow = []
             lastRow = False
@@ -128,6 +128,9 @@ class NeuralNet():
                     randomWeight = random.uniform(-0.01, 0.01)
                     node.adoptChild(cNode, randomWeight)
             lastLayer = nextRow
+
+        for node in self.topNodes:
+            node.sayHiToTheKids()
 
     def train(self, inputs, expected):
         # Take this list of [0, 0, 4, 1]
