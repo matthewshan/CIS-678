@@ -1,13 +1,17 @@
-import numpy as np
+a = [1, 2, 3]
 
-A = np.array([[3, 2], 
-              [1, 2]])
+print(a[:-1])
 
-print(A[1])
+# import numpy as np
 
-# x = np.array([1, 1])
+# A = np.array([[3, 2], 
+#               [1, 2]])
 
-# y = np.matmul(A, x)
+# print(A[1])
+
+# # x = np.array([1, 1])
+
+# # y = np.matmul(A, x)
 
 # print(y)
 # y[0] = 12

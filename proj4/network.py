@@ -28,20 +28,26 @@ class Network():
             list_of_outputs.append(current_input)
         return list_of_outputs
 
+    #list of oututs is a 
     def back_propogate(self, list_of_outputs, target):
-        output_error_list = []
+        layer_index = len(self.layers) - 1
 
         # Errors of the final layer
+        output_error_list = []
         final_vector = list_of_outputs[-1]
         for entry in final_vector:
             output_error = (target - entry)*entry*(1-entry)
             output_error_list.append(output_error)
+        self.layers[layer_index].errors = output_error_list
+        
+        #Now figure out the errors for each layer
+        for layer in range():
 
-        layer_index = len(self.layers) - 2
+        
         self.back_propogate_hidden(list_of_outputs[0:-1], list_of_errors, layer_index)
 
 
-    def back_propogate_hidden(self, list_of_outputs, list_of_errors, layer_index)
+    def back_propogate_hidden(self, list_of_outputs, list_of_errors, layer_index):
         temp = 0
         layer = self.layers[layer_index]
         next_errors = [] 
@@ -68,9 +74,10 @@ class Layer():
         self.output_dim = output_dim
         self.num_neurons = num_neurons
         self.weights = np.zeros((output_dim, num_neurons))
+        self.errors = []
         for i in self.weights: #Row
             for j in self.weights[i]: #Col
-                if col_num == 0:
+                if j == 0:
                     self.weights[i][j] = 1
                 else:
                     self.weights[i][j] = random.uniform(-0.01, 0.01)
