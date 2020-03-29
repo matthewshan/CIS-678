@@ -1,6 +1,6 @@
 a = [1, 2, 3]
 
-print(a[:-1])
+print([a for a in range(4, -1, -1)])
 
 # import numpy as np
 
