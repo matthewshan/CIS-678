@@ -1,6 +1,8 @@
-a = [1, 2, 3]
 
-print([a for a in range(4, -1, -1)])
+print("Number Correct: ", 1/2)
+# a = [1, 2, 3]
+
+# print([a for a in range(4, -1, -1)])
 
 # import numpy as np
 
