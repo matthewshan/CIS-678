@@ -83,7 +83,7 @@ class Node:
                 # Let the child know their parent, and the weight between them
                 child[0].sayHiToDad(self, child[1])
                 child[0].sayHiToTheKids()
-        greetedKids = True
+        self.greetedKids = True
         
     # Learn a node is a parent, as well as the weight to them
     def sayHiToDad(self, parentNode, weight):
@@ -127,9 +127,11 @@ class NeuralNet():
 
             # Connect each new node to the layer above it
             for node in lastLayer:
-                for cNode in nextRow:
-                    randomWeight = random.uniform(-0.01, 0.01)
-                    node.adoptChild(cNode, randomWeight)
+                if (not node.isBias):
+                    for cNode in nextRow:
+                        #randomWeight = random.uniform(-0.01, 0.01)
+                        randomWeight = 1
+                        node.adoptChild(cNode, randomWeight)
             lastLayer = nextRow
 
         for node in self.topNodes:
@@ -140,8 +142,8 @@ class NeuralNet():
         if (len(inputs) != len(self.leafNodes)):
             raise ValueError
         # Set the 4 leaf nodes to 0, 0, 4, and 1 (not forgetting the bias node)
-        for i in range(1, len(self.leafNodes)):
-            self.leafNodes[i].value = inputs[i-1]
+        for i in range(1, len(self.leafNodes) + 1):
+            self.leafNodes[i-1].value = inputs[i-1]
 
         for i, topNode in enumerate(self.topNodes):
             topNode.updateNodeVal()
@@ -156,8 +158,8 @@ class NeuralNet():
         if (len(inputs) != len(self.leafNodes)):
             raise ValueError
         
-        for i in range(1, len(self.leafNodes)):
-            self.leafNodes[i].value = inputs[i-1]
+        for i in range(1, len(self.leafNodes) + 1):
+            self.leafNodes[i-1].value = inputs[i-1]
 
         for topNode in self.topNodes:
             topNode.updateNodeVal()
@@ -198,9 +200,14 @@ def process_test(inputs):
         result.append(listOfDicts[i][data])
     return result
 
+def tryNetwork():
+    network = NeuralNet([1,2,2])
+    data_entry = [0.5, 3]
+    network.train(data_entry, 1)
+
 def weather():
     read_examples("fishingNN.data")
-    network = NeuralNet([1, 10, 7, total_attributes])
+    network = NeuralNet([1, 2, total_attributes])
     for _ in range(1):
         for example in data_entries:
             expected = example[-1]
@@ -220,5 +227,5 @@ def weather():
     test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
     print(network.test(test_data))
     
-
-weather()
+tryNetwork()
+#weather()
