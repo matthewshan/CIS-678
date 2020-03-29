@@ -52,9 +52,10 @@ class Network():
             for row in range(self.layers[l].output_dim):
                 sums = 0
                 for col in range(self.layers[l].num_neurons):
-                    sums += self.layers[l].weights[row][col] * self.layers[l+1].errors[row]
-                error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
-                self.layers[l].errors.append(error)       
+                    for e in self.layers[l+1].errors:
+                        sums += self.layers[l].weights[row][col] * e
+                    error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
+                    self.layers[l].errors.append(error)      
     
     def learn(self):
         for l in range(len(self.layers)-1, 0, -1):
