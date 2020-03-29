@@ -1,9 +1,9 @@
 import numpy as np
-import random
+import random, math
 from os import system, name
 
 data_entries = []
-LEARNING_RATE = .5
+LEARNING_RATE = .07
 
 def read_examples(file_path):
     data_list = []
@@ -79,31 +79,53 @@ class Network():
             
 
 class Layer():
-    def __init__(self, output_dim, num_neurons):
+    def __init__(self, output_dim, num_neurons, activation="sigmoid"):
         self.output_dim = output_dim
         self.num_neurons = num_neurons
         self.weights = np.zeros((output_dim, num_neurons), dtype=np.float128)
         self.inputs = []
         self.outputs = []
         self.errors = []
+        self.activation = activation
         for i in range(len(self.weights)): #Row
             for j in range(len(self.weights[i])): #Col
                 if j == 0:
                     self.weights[i][j] = 1
                 else:
-                    self.weights[i][j] = random.uniform(-0.01, 0.01)
+                    self.weights[i][j] = random.uniform(-1/math.sqrt(num_neurons), 1/math.sqrt(num_neurons))
                     
 
     def accept_input(self, input_x):
         input_x = [1] + input_x
         self.inputs = input_x
         output = np.matmul(self.weights, input_x)
-        self.outputs = Layer.sigmoid(output)
+        if self.activation == "sigmoid":
+            self.outputs = Layer.sigmoid(output)
+        elif self.activation == "relu":
+            self.outputs = Layer.relu(output)
+        elif self.activation == "softmax":
+            self.outputs = Layer.softmax(output)
         return self.outputs
 
     @staticmethod
     def sigmoid(z):
         return 1/(1 + np.exp(-z))
+
+    @staticmethod
+    def relu(z):
+        for i, val in z:
+            if val < 0:
+                z[i] = 0
+        return z
+
+    @staticmethod
+    def softmax(z):
+        bottom = 0
+        for i in z:
+            bottom += math.exp(i)
+        z = np.exp(z)/bottom
+        return z
+
 
 #Create the network
 total_attributes = 0
@@ -115,21 +137,7 @@ def read_examples(file_path, delim):
     file = open(file_path)
     for line in file:
         entry = line.strip("\n").split(delim)
-        # # by index, assign each attribute value a numerical value based on the order it was first encountered
-        # for index, attributeVal in enumerate(entry[:-1]):
-        #     if (index in listOfDicts and attributeVal in listOfDicts[index]):
-        #         # If it's already been encountered, translate the attribute to the value it received
-        #         entry[index] = listOfDicts[index][attributeVal]
-        #     else:
-        #         # otherwise, register the attribute value at this index with the value one higher than the last value registered at this index
-        #         # list of dicts = [{"hot": 0, "cold": 1, "lukewarm": 2}, {"sunny": 0, "cloudy": 1, "rainy": 2}]
-        #         if(not index in listOfDicts):
-        #             listOfDicts[index] = {}
-        #         listOfDicts[index][attributeVal] = len(listOfDicts[index].keys())
-        #         entry[index] = listOfDicts[index][attributeVal]
         data_list.append(entry)
-        # global total_attributes
-        # total_attributes = len(entry) - 1
     file.close()
     global data_entries
     data_entries = data_list
@@ -140,29 +148,17 @@ def process_test(inputs):
         result.append(listOfDicts[i][data])
     return result
 
-def test():
-    read_examples("test.data", ",")
-    network = Network([
-        Layer(output_dim=4, num_neurons=2),
-        Layer(output_dim=2, num_neurons=2),
-        Layer(output_dim=1, num_neurons=2)
-    ])
-    for example in data_entries:
-        network.train(example[:-1], [1])
-
-
 def numbers():
     print("Training Data")
     read_examples("digits-training.data", " ")
     network = Network([
         Layer(output_dim=32, num_neurons=64),
-        Layer(output_dim=16, num_neurons=32),
-        Layer(output_dim=10, num_neurons=16)
+        Layer(output_dim=10, num_neurons=32)
     ])
 
-    episodes = 500
+    episodes = len(data_entries)
     for i, example in enumerate(data_entries):
-        if i == 500:
+        if i == episodes:
             break
         _ = system('clear')
         print("Training Data: Example", i, "/", episodes)
@@ -187,35 +183,52 @@ def numbers():
     print("Trials: ", trials)
     print("Accuracy:", correct/trials)
 
-
+def process_weather(example):
+    # [0-Strong, 0-Weak, 1-Warm, 1-Moderate, 1-Weak, 2-Warm, 2-Cool, 3-Sunny, 3-Cloudy, 3-Rainy]
+    translate = [
+        {
+            "Strong": [1, 0],
+            "Weak": [0, 1]
+        },
+        {
+            "Warm": [1, 0, 0],
+            "Moderate": [0, 1, 0],
+            "Cold": [0, 0, 1]
+        },
+        {
+            "Warm": [1, 0],
+            "Cool": [0, 1]
+        },
+        {
+            "Sunny": [1, 0, 0],
+            "Cloudy": [0, 1, 0],
+            "Rainy": [0, 0, 1]
+        }
+    ]
+    output = []
+    output.extend(translate[0][example[0]])
+    output.extend(translate[1][example[1]])
+    output.extend(translate[2][example[2]])
+    output.extend(translate[3][example[3]])
+    return output
+    
 
 def weather():
-    read_examples("fishing.data", ",")
+    read_examples("fishingNN.data", ",")
     network = Network([
-        Layer(output_dim=8, num_neurons=4),
-        Layer(output_dim=4, num_neurons=8),
-        Layer(output_dim=2, num_neurons=4)
+        Layer(output_dim=5, num_neurons=10, activation="sigmoid"),
+        Layer(output_dim=2, num_neurons=5, activation="softmax")
     ])
-    for _ in range(1):
-        for example in data_entries:
-            expected = example[-1]
-            if (expected == "Yes"):
-                expected = [1, 0]
-            else:
-                #print(expected)
-                expected = [0, 1]
-            network.train(example[:-1], expected)
-
-    # test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
-    test_data = [0, -1, 0, -1]
-    print(network.test(test_data))
-
-    # test_data = process_test(["Strong", "Warm", "Warm", "Rainy"])
-    test_data = [1, 1, 1, -1]
-    print(network.test(test_data))
-
-    #test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
-    test_data = [0, -1, 0, -1]
-    print(network.test(test_data))
+    for example in data_entries:
+        expected = example[-1]
+        if (expected == "Yes"):
+            expected = [1, 0]
+        else:
+            expected = [0, 1]
+        network.train(process_weather(example[:-1]), expected)
+    for example in data_entries:
+        expected = example[-1]
+        result = network.test(process_weather(example[:-1]))
+        print(result, expected)
     
 weather()
