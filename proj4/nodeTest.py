@@ -129,8 +129,8 @@ class NeuralNet():
             for node in lastLayer:
                 if (not node.isBias):
                     for cNode in nextRow:
-                        #randomWeight = random.uniform(-0.01, 0.01)
-                        randomWeight = 1
+                        randomWeight = random.uniform(-0.01, 0.01)
+                        #randomWeight = 1
                         node.adoptChild(cNode, randomWeight)
             lastLayer = nextRow
 
@@ -203,7 +203,7 @@ def process_test(inputs):
 def tryNetwork():
     network = NeuralNet([1,2,2])
     data_entry = [0.5, 3]
-    network.train(data_entry, 1)
+    network.train(data_entry, [1])
 
 def weather():
     read_examples("fishingNN.data")
@@ -224,8 +224,8 @@ def weather():
     test_data = process_test(["Strong", "Warm", "Warm", "Rainy"])
     print(network.test(test_data))
 
-    test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
+    test_data = process_test(["Weak", "Cold", "Cool", "Sunny"])
     print(network.test(test_data))
     
-tryNetwork()
-#weather()
+#tryNetwork()
+weather()
