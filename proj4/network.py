@@ -105,12 +105,12 @@ class Layer():
 total_attributes = 0
 listOfDicts = {}
 
-def read_examples(file_path):
+def read_examples(file_path, delim):
     global listOfDicts
     data_list = []
     file = open(file_path)
     for line in file:
-        entry = line.strip("\n").split(",")
+        entry = line.strip("\n").split(delim)
         # by index, assign each attribute value a numerical value based on the order it was first encountered
         for index, attributeVal in enumerate(entry[:-1]):
             if (index in listOfDicts and attributeVal in listOfDicts[index]):
@@ -137,7 +137,7 @@ def process_test(inputs):
     return result
 
 def test():
-    read_examples("test.data")
+    read_examples("test.data", ",")
     network = Network([
         Layer(output_dim=2, num_neurons=2),
         Layer(output_dim=1, num_neurons=2)
@@ -146,12 +146,39 @@ def test():
         network.train(example[:-1], [1])
 
 
-def weather():
-    read_examples("fishingNN.data")
+def numbers():
+    read_examples("digits-training.data", " ")
     network = Network([
-    Layer(output_dim=2, num_neurons=4),
-    Layer(output_dim=1, num_neurons=2)
-])
+        Layer(output_dim=32, num_neurons=64),
+        Layer(output_dim=16, num_neurons=32),
+        Layer(output_dim=10, num_neurons=16)
+    ])
+
+    for example in data_entries:
+        expected = np.zeros(10)
+        expected[int(example[-1])] = 1
+        network.train(example[:-1], expected)
+    
+    test_data = network.test([0, 0, 8, 15, 16, 13, 0, 0, 0, 1, 11, 9, 11, 16, 1, 0, 0, 0, 0, 0, 7, 14, 0, 0, 0, 0, 3, 4, 14, 12, 2, 0, 0, 1, 16, 16, 16, 16, 10, 0, 0, 2, 12, 16, 10, 0, 0, 0, 0, 0, 2, 16, 4, 0, 0, 0, 0, 0, 9, 14, 0, 0, 0, 0, 7])
+    print(test_data)
+
+    # read_examples("digit-test.data", " ")
+    # correct = 0
+    # total = 0
+    # for example in data_entries:
+    #     expected = np.zeros(10)
+    #     expected[example[-1]] = 1
+    #     result = network.test(example[:-1], expected)
+    #     if result == 
+
+
+
+def weather():
+    read_examples("fishingNN.data", ",")
+    network = Network([
+        Layer(output_dim=2, num_neurons=4),
+        Layer(output_dim=1, num_neurons=2)
+    ])
     for _ in range(1):
         for example in data_entries:
             expected = example[-1]
@@ -172,4 +199,4 @@ def weather():
     print(network.test(test_data))
     
 
-weather()
+numbers()
