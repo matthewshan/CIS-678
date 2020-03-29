@@ -153,7 +153,7 @@ def numbers():
     read_examples("digits-training.data", " ")
     network = Network([
         Layer(output_dim=32, num_neurons=64),
-        Layer(output_dim=10, num_neurons=32)
+        Layer(output_dim=10, num_neurons=32, activation="softmax")
     ])
 
     episodes = len(data_entries)
@@ -216,8 +216,7 @@ def process_weather(example):
 def weather():
     read_examples("fishingNN.data", ",")
     network = Network([
-        Layer(output_dim=5, num_neurons=10, activation="sigmoid"),
-        Layer(output_dim=2, num_neurons=5, activation="softmax")
+        Layer(output_dim=2, num_neurons=10, activation="softmax")
     ])
     for example in data_entries:
         expected = example[-1]
@@ -231,4 +230,4 @@ def weather():
         result = network.test(process_weather(example[:-1]))
         print(result, expected)
     
-weather()
+numbers()
