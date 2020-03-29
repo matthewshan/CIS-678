@@ -169,12 +169,12 @@ class NeuralNet():
 total_attributes = 0
 listOfDicts = {}
 
-def read_examples(file_path):
+def read_examples(file_path, dl):
     global listOfDicts
     data_list = []
     file = open(file_path)
     for line in file:
-        entry = line.strip("\n").split(",")
+        entry = line.strip("\n").split(dl)
         # by index, assign each attribute value a numerical value based on the order it was first encountered
         for index, attributeVal in enumerate(entry[:-1]):
             if (index in listOfDicts and attributeVal in listOfDicts[index]):
@@ -206,7 +206,7 @@ def tryNetwork():
     network.train(data_entry, [1])
 
 def weather():
-    read_examples("fishingNN.data")
+    read_examples("fishingNN.data", ",")
     network = NeuralNet([1, 2, total_attributes])
     for _ in range(1):
         for example in data_entries:
@@ -217,6 +217,7 @@ def weather():
                 #print(expected)
                 expected = [0]
             network.train(example[:-1], expected)
+            print("Finished Training")
 
     test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
     print(network.test(test_data))
@@ -226,6 +227,31 @@ def weather():
 
     test_data = process_test(["Weak", "Cold", "Cool", "Sunny"])
     print(network.test(test_data))
-    
+
+def makeArray(index):
+    array = [10]
+    for ind in range(9):
+        if (ind == index):
+            array.append(1)
+        else:
+            array.append(0)
+    return array
+
+def numbers():
+    read_examples("digits-training.data", " ")
+    print("Finished reading examples")
+    network = NeuralNet([10, 16, 32, total_attributes])
+    print("Made Neural Net")
+    for _ in range(1):
+        for example in data_entries:
+            expected = example[-1]
+            expected = makeArray(expected)
+            network.train(example[:-1], expected)
+            print("Finished Training")
+
+    test_data = process_test([0, 0, 8, 15, 16, 13, 0, 0, 0, 1, 11, 9, 11, 16, 1, 0, 0, 0, 0, 0, 7, 14, 0, 0, 0, 0, 3, 4, 14, 12, 2, 0, 0, 1, 16, 16, 16, 16, 10, 0, 0, 2, 12, 16, 10, 0, 0, 0, 0, 0, 2, 16, 4, 0, 0, 0, 0, 0, 9, 14, 0, 0, 0, 0, 7])
+    print(network.test(test_data))
+
 #tryNetwork()
-weather()
+#weather()
+numbers()
