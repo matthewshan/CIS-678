@@ -3,7 +3,8 @@ import random, math
 from os import system, name
 
 data_entries = []
-LEARNING_RATE = .07
+LEARNING_RATE = .05
+GLOBAL_INPUTS = 0
 
 def read_examples(file_path):
     data_list = []
@@ -20,6 +21,7 @@ class Network():
         self.layers = layers
         self.output_dim = self.layers[-1].output_dim
         self.output_error_list = []
+        
 
     def feed_forward(self, input_x):
         list_of_outputs = []
@@ -92,7 +94,8 @@ class Layer():
                 if j == 0:
                     self.weights[i][j] = 1
                 else:
-                    self.weights[i][j] = random.uniform(-1/math.sqrt(num_neurons), 1/math.sqrt(num_neurons))
+                    global GLOBAL_INPUTS
+                    self.weights[i][j] = random.uniform(-1/math.sqrt(GLOBAL_INPUTS), 1/math.sqrt(GLOBAL_INPUTS))
                     
 
     def accept_input(self, input_x):
@@ -113,7 +116,7 @@ class Layer():
 
     @staticmethod
     def relu(z):
-        for i, val in z:
+        for i, val in enumerate(z):
             if val < 0:
                 z[i] = 0
         return z
@@ -121,8 +124,9 @@ class Layer():
     @staticmethod
     def softmax(z):
         bottom = 0
-        for i in z:
-            bottom += math.exp(i)
+        temp = np.exp(z)
+        for i in temp:
+            bottom += i
         z = np.exp(z)/bottom
         return z
 
@@ -148,11 +152,19 @@ def process_test(inputs):
         result.append(listOfDicts[i][data])
     return result
 
+def process_numbers(example):
+    result = []
+    for val in example:
+        result.append(int(val)/16)
+    return result 
+
 def numbers():
+    global GLOBAL_INPUTS
     print("Training Data")
     read_examples("digits-training.data", " ")
+    GLOBAL_INPUTS = 64
     network = Network([
-        Layer(output_dim=32, num_neurons=64),
+        Layer(output_dim=32, num_neurons=64, activation="relu"),
         Layer(output_dim=10, num_neurons=32, activation="softmax")
     ])
 
@@ -164,7 +176,7 @@ def numbers():
         print("Training Data: Example", i, "/", episodes)
         expected = np.zeros(10, dtype=np.float128)
         expected[int(example[-1])] = 1
-        network.train(example[:-1], expected)
+        network.train(process_numbers(example[:-1]), expected)
     
     read_examples("digits-test.data", " ")
     correct = 0
@@ -175,7 +187,7 @@ def numbers():
         print("Testing Data: Example", i, "/", len(data_entries))
         expected = np.zeros(10, dtype=np.float128)
         expected[int(example[-1])] = 1
-        result = network.test(example[:-1])
+        result = network.test(process_numbers(example[:-1]))
         if(int(example[-1]) == np.argmax(result)):
             correct += 1
         trials += 1
@@ -215,6 +227,8 @@ def process_weather(example):
 
 def weather():
     read_examples("fishingNN.data", ",")
+    global GLOBAL_INPUTS
+    GLOBAL_INPUTS = 10
     network = Network([
         Layer(output_dim=2, num_neurons=10, activation="softmax")
     ])
