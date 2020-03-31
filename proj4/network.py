@@ -3,7 +3,7 @@ import random, math
 from os import system, name
 
 data_entries = []
-LEARNING_RATE = .05
+LEARNING_RATE = .1
 GLOBAL_INPUTS = 0
 
 def read_examples(file_path):
@@ -39,7 +39,10 @@ class Network():
         for i, entry in enumerate(list_of_outputs):
             output_error = (target[i] - entry)*entry*(1-entry)
             self.output_error_list.append(output_error)
-    
+
+
+        #TODO: MAKE SURE THE BIAS IS NOT BEING INCLUDED
+        #TODO: MAKE SURE THE INPUT ARRAY IS AFTER ACTIVATION
         #Calcute last layer errors
         l = len(self.layers)-1
         for col in range(self.layers[l].num_neurons):
@@ -83,8 +86,8 @@ class Network():
 class Layer():
     def __init__(self, output_dim, num_neurons, activation="sigmoid"):
         self.output_dim = output_dim
-        self.num_neurons = num_neurons
-        self.weights = np.zeros((output_dim, num_neurons), dtype=np.float128)
+        self.num_neurons = num_neurons+1
+        self.weights = np.zeros((output_dim, num_neurons+1), dtype=np.float128)
         self.inputs = []
         self.outputs = []
         self.errors = []
@@ -99,7 +102,9 @@ class Layer():
                     
 
     def accept_input(self, input_x):
-        input_x = [1] + input_x
+        temp = [1]
+        temp.extend(input_x)
+        input_x = temp
         self.inputs = input_x
         output = np.matmul(self.weights, input_x)
         if self.activation == "sigmoid":
