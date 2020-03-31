@@ -40,16 +40,13 @@ class Network():
             output_error = (target[i] - entry)*entry*(1-entry)
             self.output_error_list.append(output_error)
 
-
-        #TODO: MAKE SURE THE BIAS IS NOT BEING INCLUDED
-        #TODO: MAKE SURE THE INPUT ARRAY IS AFTER ACTIVATION
         #Calcute last layer errors
         l = len(self.layers)-1
         for col in range(self.layers[l].num_neurons):
             sums = 0
             for row in range(self.layers[l].output_dim):
                 sums += self.layers[l].weights[row][col] * self.output_error_list[row]
-            error = self.layers[l].inputs[col] * (1 - self.layers[l].inputs[col]) * sums
+            error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
             self.layers[l].errors.append(error)
         
         
@@ -59,9 +56,8 @@ class Network():
                 sums = 0
                 for row in range(self.layers[l].output_dim):
                     sums += self.layers[l].weights[row][col] * self.layers[l+1].errors[row]
-                error = self.layers[l].inputs[col] * (1 - self.layers[l].inputs[col]) * sums
+                error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
                 self.layers[l].errors.append(error)
-
     
     def learn(self):
         l = len(self.layers)-1
