@@ -165,8 +165,8 @@ def numbers():
     read_examples("digits-training.data", " ")
     GLOBAL_INPUTS = 64
     network = Network([
-        Layer(output_dim=32, num_neurons=64, activation="relu"),
-        Layer(output_dim=10, num_neurons=32, activation="softmax")
+        Layer(output_dim=42, num_neurons=64, activation="relu"),
+        Layer(output_dim=10, num_neurons=42, activation="softmax")
     ])
 
     episodes = len(data_entries)
