@@ -3,7 +3,7 @@ import random, math
 from os import system, name
 
 data_entries = []
-LEARNING_RATE = .1
+LEARNING_RATE = .07
 GLOBAL_INPUTS = 0
 
 def read_examples(file_path):
@@ -233,16 +233,17 @@ def weather():
     network = Network([
         Layer(output_dim=2, num_neurons=10, activation="softmax")
     ])
-    for example in data_entries:
-        expected = example[-1]
-        if (expected == "Yes"):
-            expected = [1, 0]
-        else:
-            expected = [0, 1]
-        network.train(process_weather(example[:-1]), expected)
+    for i in range(1000):
+        for example in data_entries:
+            expected = example[-1]
+            if (expected == "Yes"):
+                expected = [1, 0]
+            else:
+                expected = [0, 1]
+            network.train(process_weather(example[:-1]), expected)
     for example in data_entries:
         expected = example[-1]
         result = network.test(process_weather(example[:-1]))
         print(result, expected)
     
-numbers()
+weather()
