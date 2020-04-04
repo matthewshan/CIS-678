@@ -4,7 +4,7 @@ from os import system, name
 
 data_entries = []
 my_time = datetime.datetime.now()
-LEARNING_RATE = .1
+LEARNING_RATE = .5
 GLOBAL_INPUTS = 0
 TIMESTAMP = (my_time.strftime("%m-%d-%Y %I.%M.%S%p"))
 
@@ -176,6 +176,7 @@ def tutorial():
     network.layers[1].weights = np.array([[1, 1.5, -1]])
 
     network.train([0, 1], [1])
+    print("Hrlp")
 
 def numbers():
     global GLOBAL_INPUTS
@@ -184,7 +185,7 @@ def numbers():
     GLOBAL_INPUTS = 64
     network = Network([
         Layer(output_dim=42, num_neurons=64),
-        Layer(output_dim=10, num_neurons=42)
+        Layer(output_dim=10, num_neurons=42, activation='softmax')
     ])
 
     episodes = len(data_entries)
@@ -279,4 +280,4 @@ def test_weather_model(file_name):
 
     
 # test_weather_model("Weather Models/04-04-2020 03.16.50PM")
-numbers()
+tutorial()
