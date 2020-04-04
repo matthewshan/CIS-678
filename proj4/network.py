@@ -1,10 +1,12 @@
 import numpy as np
-import random, math
+import random, math, pickle, datetime
 from os import system, name
 
 data_entries = []
-LEARNING_RATE = .07
+my_time = datetime.datetime.now()
+LEARNING_RATE = .1
 GLOBAL_INPUTS = 0
+TIMESTAMP = (my_time.strftime("%m-%d-%Y %I.%M.%S%p"))
 
 def read_examples(file_path):
     data_list = []
@@ -29,34 +31,34 @@ class Network():
         # For each layer, take this input and give me the input for the next layer, until we get y
         for layer in self.layers:
             current_input = layer.accept_input(current_input)
-            list_of_outputs = current_input
-        return list_of_outputs
+        return current_input
 
     #list of oututs is a 
     def back_propogate(self, list_of_outputs, target):
         # Errors of the final layer
         self.output_error_list = []
         for i, entry in enumerate(list_of_outputs):
-            output_error = (target[i] - entry)*entry*(1-entry)
+            output_error = entry*(1-entry)*(target[i] - entry)
             self.output_error_list.append(output_error)
+
 
         #Calcute last layer errors
         l = len(self.layers)-1
-        for col in range(self.layers[l].num_neurons):
+        for col in range(1, self.layers[l].num_neurons):
             sums = 0
             for row in range(self.layers[l].output_dim):
                 sums += self.layers[l].weights[row][col] * self.output_error_list[row]
-            error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
+            error = self.layers[l].inputs[col] * (1 - self.layers[l].inputs[col]) * sums
             self.layers[l].errors.append(error)
         
         
         #Now figure out the errors for each layer
-        for l in range(len(self.layers)-2, -1 , -1):
-            for col in range(self.layers[l].num_neurons):
+        for l in range(len(self.layers)-2, 0, -1):
+            for col in range(1, self.layers[l].num_neurons):
                 sums = 0
                 for row in range(self.layers[l].output_dim):
                     sums += self.layers[l].weights[row][col] * self.layers[l+1].errors[row]
-                error = self.layers[l].outputs[row] * (1 - self.layers[l].outputs[row]) * sums
+                error = self.layers[l].inputs[col] * (1 - self.layers[l].inputs[col]) * sums
                 self.layers[l].errors.append(error)
     
     def learn(self):
@@ -68,7 +70,7 @@ class Network():
         for l in range(len(self.layers)-2, -1, -1):
             for row in range(self.layers[l].output_dim):
                 for col in range(self.layers[l].num_neurons):
-                    self.layers[l].weights[row][col] += LEARNING_RATE *  self.layers[l+1].errors[row] * self.layers[l].inputs[col]
+                    self.layers[l].weights[row][col] += LEARNING_RATE * self.layers[l+1].errors[row] * self.layers[l].inputs[col]
 
     def train(self, input_x, target):
         result = self.feed_forward(input_x)
@@ -76,7 +78,12 @@ class Network():
         self.learn()
 
     def test(self, input_x):
-        return self.feed_forward(input_x)            
+        return self.feed_forward(input_x)        
+
+    def save_model(self, file_path):    
+        my_file = open(file_path, 'wb')
+        pickle.dump(self, my_file)
+        my_file.close()
             
 
 class Layer():
@@ -90,15 +97,13 @@ class Layer():
         self.activation = activation
         for i in range(len(self.weights)): #Row
             for j in range(len(self.weights[i])): #Col
-                if j == 0:
-                    self.weights[i][j] = 1
-                else:
-                    global GLOBAL_INPUTS
-                    self.weights[i][j] = random.uniform(-1/math.sqrt(GLOBAL_INPUTS), 1/math.sqrt(GLOBAL_INPUTS))
+                global GLOBAL_INPUTS
+                self.weights[i][j] = random.uniform(-0.1, 0.1)
+                #self.weights[i][j] = random.uniform(-1/math.sqrt(GLOBAL_INPUTS), 1/math.sqrt(GLOBAL_INPUTS))
                     
 
     def accept_input(self, input_x):
-        temp = [1]
+        temp = [1.0]
         temp.extend(input_x)
         input_x = temp
         self.inputs = input_x
@@ -159,31 +164,46 @@ def process_numbers(example):
         result.append(int(val)/16)
     return result 
 
+
+def tutorial():
+    network = Network([
+        Layer(output_dim=2, num_neurons=2),
+        Layer(output_dim=1, num_neurons=2)
+    ])
+    network.layers[0].weights = np.array([[1, 1, 0.5],
+                                         [1, -1, 2]])
+
+    network.layers[1].weights = np.array([[1, 1.5, -1]])
+
+    network.train([0, 1], [1])
+
 def numbers():
     global GLOBAL_INPUTS
     print("Training Data")
     read_examples("digits-training.data", " ")
     GLOBAL_INPUTS = 64
     network = Network([
-        Layer(output_dim=42, num_neurons=64, activation="relu"),
-        Layer(output_dim=10, num_neurons=42, activation="softmax")
+        Layer(output_dim=42, num_neurons=64),
+        Layer(output_dim=10, num_neurons=42)
     ])
 
     episodes = len(data_entries)
-    for i, example in enumerate(data_entries):
-        if i == episodes:
-            break
-        _ = system('clear')
-        print("Training Data: Example", i, "/", episodes)
-        expected = np.zeros(10, dtype=np.float128)
-        expected[int(example[-1])] = 1
-        network.train(process_numbers(example[:-1]), expected)
+    for epoc in range(1):
+        for i, example in enumerate(data_entries):
+            if i == episodes:
+                break
+            _ = system('clear')
+            print("Training Data: Epoch #", epoc, ", Example", i, "/", episodes)
+            expected = np.zeros(10, dtype=np.float128)
+            expected[int(example[-1])] = 1
+            network.train(process_numbers(example[:-1]), expected)
+
+    network.save_model("Handwritten Models/" + TIMESTAMP)
     
     read_examples("digits-test.data", " ")
     correct = 0
     trials = 0
     for i, example in enumerate(data_entries):
-        
         _ = system('clear')
         print("Testing Data: Example", i, "/", len(data_entries))
         expected = np.zeros(10, dtype=np.float128)
@@ -233,7 +253,7 @@ def weather():
     network = Network([
         Layer(output_dim=2, num_neurons=10, activation="softmax")
     ])
-    for i in range(1000):
+    for i in range(10):
         for example in data_entries:
             expected = example[-1]
             if (expected == "Yes"):
@@ -241,9 +261,22 @@ def weather():
             else:
                 expected = [0, 1]
             network.train(process_weather(example[:-1]), expected)
+    network.save_model("Weather Models/" + TIMESTAMP)
     for example in data_entries:
         expected = example[-1]
         result = network.test(process_weather(example[:-1]))
         print(result, expected)
+
+def test_weather_model(file_name):
+    my_file = open(file_name, 'rb')
+    network = pickle.load(my_file)
+    my_file.close()
+    read_examples("fishingNN.data", ",")
+    for example in data_entries:
+        expected = example[-1]
+        result = network.test(process_weather(example[:-1]))
+        print(result, expected)
+
     
-weather()
+# test_weather_model("Weather Models/04-04-2020 03.16.50PM")
+numbers()

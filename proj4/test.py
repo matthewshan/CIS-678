@@ -1,14 +1,12 @@
-
-print("Number Correct: ", 1/2)
 # a = [1, 2, 3]
 
-# print([a for a in range(4, -1, -1)])
+print([a for a in range(4, -1, -1)])
 
-# import numpy as np
+import numpy as np
 
-# A = np.array([[3, 2], 
-#               [1, 2]])
-
+A = np.array([[3, 2], 
+             [1, 2]])
+print(A/3.0)
 # print(A[1])
 
 # # x = np.array([1, 1])
