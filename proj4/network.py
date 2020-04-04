@@ -188,7 +188,7 @@ def numbers():
     ])
 
     episodes = len(data_entries)
-    for epoc in range(1):
+    for epoc in range(10):
         for i, example in enumerate(data_entries):
             if i == episodes:
                 break
