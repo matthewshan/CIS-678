@@ -1,8 +1,10 @@
 import random, math
+import numpy as np
 
 data_entries = []
 # The learning rate for the learn method
-LEARNING_RATE = 0.5
+LEARNING_RATE = 0.1
+WEATHER_FLAG = True
 
 class Node:
     def __init__(self):
@@ -26,6 +28,22 @@ class Node:
     @staticmethod
     def sigmoid(z):
         return 1/(1 + math.exp(-z))
+
+    @staticmethod
+    def softmax(z):
+        bottom = 0
+        temp = np.exp(z)
+        for i in temp:
+            bottom += i
+        z = np.exp(z)/bottom
+        return z
+
+    @staticmethod
+    def relu(z):
+        for i, val in enumerate(z):
+            if val < 0:
+                z[i] = 0
+        return z
 
     # This method needs only to be called on the top nodes. It will update their value, as well as the children's values accordingly.
     def updateNodeVal(self):
@@ -138,15 +156,30 @@ class NeuralNet():
             node.sayHiToTheKids()
 
     def train(self, inputs, expected):
-        # Take this list of [0, 0, 4, 1]
         if (len(inputs) != len(self.leafNodes)):
             raise ValueError
-        # Set the 4 leaf nodes to 0, 0, 4, and 1 (not forgetting the bias node)
+        # Set the leaf nodes to the appropriate values
         for i in range(1, len(self.leafNodes) + 1):
             self.leafNodes[i-1].value = inputs[i-1]
 
+        # Calculate the new values for the output nodes
         for i, topNode in enumerate(self.topNodes):
             topNode.updateNodeVal()
+        
+        # Softmax those output values to get the probabilities
+        topnodeValList = []
+        for topNode in self.topNodes:
+            topnodeValList.append(topNode.value)
+
+        newTopnodeValues = Node.softmax(topnodeValList)
+        print (newTopnodeValues)
+        index = 0
+        # Assign softmax'd values to the output nodes
+        for topNode in self.topNodes:
+            topNode.value = newTopnodeValues[index]
+            index += 1
+
+        for i, topNode in enumerate(self.topNodes):
             topNode.backProp(expected[i])
         
         for topNode in self.topNodes:
@@ -164,41 +197,99 @@ class NeuralNet():
         for topNode in self.topNodes:
             topNode.updateNodeVal()
 
+        # Softmax those output values to get the probabilities
+        topnodeValList = []
+        for topNode in self.topNodes:
+            topnodeValList.append(topNode.value)
+
+        newTopnodeValues = Node.softmax(topnodeValList)
+        #print (newTopnodeValues)
+        index = 0
+        # Assign softmax'd values to the output nodes
+        for topNode in self.topNodes:
+            topNode.value = newTopnodeValues[index]
+            index += 1
+
         return [endNodes.value for endNodes in self.topNodes]
 
-total_attributes = 0
-listOfDicts = {}
+#total_attributes = 0
+#listOfDicts = {}
 
 def read_examples(file_path, dl):
-    global listOfDicts
+    #global listOfDicts
     data_list = []
     file = open(file_path)
     for line in file:
         entry = line.strip("\n").split(dl)
+        # Translate the entry into numerical data
+        global WEATHER_FLAG
+        if (WEATHER_FLAG):
+            entry = process_weather(entry)
+        else:
+            entry = process_numbers(entry)
         # by index, assign each attribute value a numerical value based on the order it was first encountered
-        for index, attributeVal in enumerate(entry[:-1]):
-            if (index in listOfDicts and attributeVal in listOfDicts[index]):
-                # If it's already been encountered, translate the attribute to the value it received
-                entry[index] = listOfDicts[index][attributeVal]
-            else:
-                # otherwise, register the attribute value at this index with the value one higher than the last value registered at this index
-                # list of dicts = [{"hot": 0, "cold": 1, "lukewarm": 2}, {"sunny": 0, "cloudy": 1, "rainy": 2}]
-                if(not index in listOfDicts):
-                    listOfDicts[index] = {}
-                listOfDicts[index][attributeVal] = len(listOfDicts[index].keys())
-                entry[index] = listOfDicts[index][attributeVal]
+        #for index, attributeVal in enumerate(entry[:-1]):
+            #if (index in listOfDicts and attributeVal in listOfDicts[index]):
+            #    # If it's already been encountered, translate the attribute to the value it received
+            #    entry[index] = listOfDicts[index][attributeVal]
+            #else:
+            #    # otherwise, register the attribute value at this index with the value one higher than the last value registered at this index
+            #    # list of dicts = [{"hot": 0, "cold": 1, "lukewarm": 2}, {"sunny": 0, "cloudy": 1, "rainy": 2}]
+            #    if(not index in listOfDicts):
+            #        listOfDicts[index] = {}
+            #    listOfDicts[index][attributeVal] = len(listOfDicts[index].keys())
+            #    entry[index] = listOfDicts[index][attributeVal]
         data_list.append(entry)
-        global total_attributes
-        total_attributes = len(entry) - 1
+        #global total_attributes
+        #total_attributes = len(entry) - 1
     file.close()
     global data_entries
     data_entries = data_list
 
-def process_test(inputs):
+def process_weather(example):
+    # [0-Strong, 0-Weak, 1-Warm, 1-Moderate, 1-Weak, 2-Warm, 2-Cool, 3-Sunny, 3-Cloudy, 3-Rainy]
+    translate = [
+        {
+            "Strong": [1, 0],
+            "Weak": [0, 1]
+        },
+        {
+            "Warm": [1, 0, 0],
+            "Moderate": [0, 1, 0],
+            "Cold": [0, 0, 1]
+        },
+        {
+            "Warm": [1, 0],
+            "Cool": [0, 1]
+        },
+        {
+            "Sunny": [1, 0, 0],
+            "Cloudy": [0, 1, 0],
+            "Rainy": [0, 0, 1]
+        }
+    ]
+    #print(str(example))
+    #print(type(example))
+    output = []
+    output.extend(translate[0][example[0]])
+    output.extend(translate[1][example[1]])
+    output.extend(translate[2][example[2]])
+    output.extend(translate[3][example[3]])
+    if (len(example) > 4):
+        output.append(example[4])
+    return output
+
+def process_numbers(example):
     result = []
-    for i, data in enumerate(inputs):
-        result.append(listOfDicts[i][data])
-    return result
+    for val in example:
+        result.append(int(val)/16)
+    return result 
+
+# def process_test(inputs):
+#     result = []
+#     for i, data in enumerate(inputs):
+#         result.append(listOfDicts[i][data])
+#     return result
 
 def tryNetwork():
     network = NeuralNet([1,2,2])
@@ -207,26 +298,32 @@ def tryNetwork():
 
 def weather():
     read_examples("fishingNN.data", ",")
-    network = NeuralNet([1, 2, total_attributes])
-    for _ in range(1):
+    network = NeuralNet([2, 8, 10])
+    for _ in range(10):
         for example in data_entries:
+            #print(example)
             expected = example[-1]
             if (expected == "Yes"):
-                expected = [1]
+                expected = [1, 0]
             else:
                 #print(expected)
-                expected = [0]
+                expected = [0, 1]
             network.train(example[:-1], expected)
-            print("Finished Training")
+        #print("Finished Epoch")
 
-    test_data = process_test(["Weak", "Cold", "Cool", "Rainy"])
-    print(network.test(test_data))
+    # test_data = process_weather(["Weak", "Cold", "Cool", "Rainy"])
+    # print(network.test(test_data))
 
-    test_data = process_test(["Strong", "Warm", "Warm", "Rainy"])
-    print(network.test(test_data))
+    # test_data = process_weather(["Strong", "Warm", "Warm", "Rainy"])
+    # print(network.test(test_data))
 
-    test_data = process_test(["Weak", "Cold", "Cool", "Sunny"])
-    print(network.test(test_data))
+    # test_data = process_weather(["Weak", "Cold", "Cool", "Sunny"])
+    # print(network.test(test_data))
+
+    for example in data_entries:
+        expected = example[-1]
+        result = network.test(example[:-1])
+        print(result, expected)
 
 def makeArray(index):
     array = [10]
@@ -240,18 +337,23 @@ def makeArray(index):
 def numbers():
     read_examples("digits-training.data", " ")
     print("Finished reading examples")
-    network = NeuralNet([10, 16, 32, total_attributes])
+    network = NeuralNet([10, 42, 64])
     print("Made Neural Net")
-    for _ in range(1):
+    for _ in range(10):
         for example in data_entries:
             expected = example[-1]
             expected = makeArray(expected)
             network.train(example[:-1], expected)
             print("Finished Training")
 
-    test_data = process_test([0, 0, 8, 15, 16, 13, 0, 0, 0, 1, 11, 9, 11, 16, 1, 0, 0, 0, 0, 0, 7, 14, 0, 0, 0, 0, 3, 4, 14, 12, 2, 0, 0, 1, 16, 16, 16, 16, 10, 0, 0, 2, 12, 16, 10, 0, 0, 0, 0, 0, 2, 16, 4, 0, 0, 0, 0, 0, 9, 14, 0, 0, 0, 0, 7])
+    test_data = [0, 0, 8, 15, 16, 13, 0, 0, 0, 1, 11, 9, 11, 16, 1, 0, 0, 0, 0, 0, 7, 14, 0, 0, 0, 0, 3, 4, 14, 12, 2, 0, 0, 1, 16, 16, 16, 16, 10, 0, 0, 2, 12, 16, 10, 0, 0, 0, 0, 0, 2, 16, 4, 0, 0, 0, 0, 0, 9, 14, 0, 0, 0, 0, 7]
     print(network.test(test_data))
 
+    for entry in data_entries[-1:-100]:
+        print(network.test(entry))
+
 #tryNetwork()
-#weather()
-numbers()
+if (WEATHER_FLAG):
+    weather()
+else:
+    numbers()
