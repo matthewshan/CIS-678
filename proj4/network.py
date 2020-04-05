@@ -4,7 +4,7 @@ from os import system, name
 
 data_entries = []
 my_time = datetime.datetime.now()
-LEARNING_RATE = .05
+LEARNING_RATE = .1
 GLOBAL_INPUTS = 0
 TIMESTAMP = (my_time.strftime("%m-%d-%Y %I.%M.%S%p"))
 
@@ -190,13 +190,11 @@ def numbers():
         Layer(output_dim=10, num_neurons=42, activation='softmax')
     ])
 
-    episodes = len(data_entries)
-    for epoc in range(1):
+    for epoc in range(10):
+        random.shuffle(data_entries)
         for i, example in enumerate(data_entries):
-            if i == episodes:
-                break
             _ = system('clear')
-            print("Training Data: Epoch #", epoc, ", Example", i, "/", episodes)
+            print("Training Data: Epoch #", epoc, ", Example", i+1, "/", len(data_entries))
             expected = np.zeros(10, dtype=np.float128)
             expected[int(example[-1])] = 1
             network.train(process_numbers(example[:-1]), expected)
