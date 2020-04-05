@@ -4,7 +4,7 @@ from os import system, name
 
 data_entries = []
 my_time = datetime.datetime.now()
-LEARNING_RATE = .5
+LEARNING_RATE = .05
 GLOBAL_INPUTS = 0
 TIMESTAMP = (my_time.strftime("%m-%d-%Y %I.%M.%S%p"))
 
@@ -44,6 +44,7 @@ class Network():
 
         #Calcute last layer errors
         l = len(self.layers)-1
+        self.layers[l].errors = []
         for col in range(1, self.layers[l].num_neurons):
             sums = 0
             for row in range(self.layers[l].output_dim):
@@ -54,6 +55,7 @@ class Network():
         
         #Now figure out the errors for each layer
         for l in range(len(self.layers)-2, 0, -1):
+            self.layers[l].errors = []
             for col in range(1, self.layers[l].num_neurons):
                 sums = 0
                 for row in range(self.layers[l].output_dim):
@@ -183,13 +185,13 @@ def numbers():
     print("Training Data")
     read_examples("digits-training.data", " ")
     GLOBAL_INPUTS = 64
-    network = Network([
+    network = Network([ 
         Layer(output_dim=42, num_neurons=64),
         Layer(output_dim=10, num_neurons=42, activation='softmax')
     ])
 
     episodes = len(data_entries)
-    for epoc in range(10):
+    for epoc in range(1):
         for i, example in enumerate(data_entries):
             if i == episodes:
                 break
@@ -280,4 +282,4 @@ def test_weather_model(file_name):
 
     
 # test_weather_model("Weather Models/04-04-2020 03.16.50PM")
-tutorial()
+numbers()
