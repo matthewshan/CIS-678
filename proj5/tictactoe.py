@@ -1,4 +1,4 @@
-import random
+import random, pickle
 # [ col 1: [row top, mid, bottom], col 2, col 3 ]
 # Thus, coordinates must be list[col][row], like the board
 board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -12,13 +12,13 @@ currentPlayer = 1
 # Not sure if needed, but our "time" for Q learning. Increments by 1 every time someone makes a move
 turnNumber = 0
 
-LEARNING_RATE = 0.5
+LEARNING_RATE = 0.3
 DISCOUNT_RATE = 0.9
 
 def feedReward(reward):
     global LEARNING_RATE, DISCOUNT_RATE, valueDict
     # Starting with the last move (not including potential moves after the final state)
-    moveIndex = len(boardHistory) - 2
+    moveIndex = len(boardHistory) - 1
     # Start at the end of the game and work your way back
     for state, action in reversed(boardHistory):
         # Initialize the values for the keys if they don't exist
@@ -56,11 +56,12 @@ def getBestMove(playerNum):
     validSpaces = returnValidSpaces()
     # t + 1
     # Find the next best move that could be taken
-    maxValue = 0
+    maxValue = -500
     bestAction = None
     for nextAction in validSpaces:
         # Generate our t+1 state using the current state and given action
-        newState = generateState(translateBoard(board), nextAction, playerNum + 1)
+        #newState = generateState(translateBoard(board), nextAction, playerNum + 1)
+        newState = translateBoard(board)
         if (newState not in valueDict):
             valueDict[newState] = {}
         if (nextAction not in valueDict[newState]):
@@ -88,12 +89,17 @@ def generateState(state, nextAction, moveNum):
 
 # This is where we will do all the stuff with Q learning and whatnot
 def ticTacGo():
-    global board, turnNumber, currentPlayer, boardHistory
+    global board, turnNumber, currentPlayer, boardHistory, valueDict
+    try:
+        with open('states.pickle', 'rb') as handle:
+            valueDict = pickle.load(handle)
+    except:
+        print("Could not load state")
     winCount = [0, 0]
     gameCount = 0
     totalTies = 0
-    AI_PLAYER = 1
-    while (gameCount < 1000):
+    AI_PLAYER = 2
+    while (gameCount < 10000):
         if currentPlayer == AI_PLAYER:
             aiMove = getBestMove(currentPlayer)
             boardHistory.append((translateBoard(board), aiMove))
@@ -122,7 +128,7 @@ def ticTacGo():
             print ("Player 1: " + str(winCount[0]))
             print("Player 2: " + str(winCount[1]))
             print("Total ties: " + str(totalTies) + "\n")
-            feedReward(-1)
+            feedReward(-5)
             resetBoard()
         elif (checkTie()):
             totalTies += 1
@@ -134,40 +140,8 @@ def ticTacGo():
             print("Total ties: " + str(totalTies) + "\n")
             feedReward(1.5*AI_PLAYER)
             resetBoard()
-    # global turnNumber, currentPlayer, boardHistory
-    # winCount = [0, 0]
-    # gameCount = 0
-    # totalTies = 0
-    # while (gameCount < 1000):
-    #     currPlay = currentPlayer
-    #     row = random.randint(0,2)
-    #     col = random.randint(0,2)
-    #     didTurn = False
-    #     # This if isn't needed, but just so we don't get a bunch of prints
-    #     if (isValidLocation([col, row])):
-    #         doTurn([col, row])
-    #         boardHistory.append((translateBoard(board), (col, row)))
-    #         didTurn = True
-    #     if (didTurn):
-    #         # If the player who did a move won
-    #         if (hasWon(currPlay)):
-    #             winCount[currPlay - 1] += 1
-    #             gameCount += 1
-    #             print ("Player " + str(currPlay) + " won game " + str(gameCount) + " after " + str(turnNumber) + " total moves.")
-    #             print("--Total wincount--")
-    #             print ("Player 1: " + str(winCount[0]))
-    #             print("Player 2: " + str(winCount[1]))
-    #             print("Total ties: " + str(totalTies) + "\n")
-    #             resetBoard()
-    #         elif (checkTie()):
-    #             totalTies += 1
-    #             gameCount += 1
-    #             print ("Game " + str(gameCount) + " has ended in a tie after " + str(turnNumber) + " total moves.")
-    #             print("--Total wincount--")
-    #             print ("Player 1: " + str(winCount[0]))
-    #             print("Player 2: " + str(winCount[1]))
-    #             print("Total ties: " + str(totalTies) + "\n")
-    #             resetBoard()
+    with open('states.pickle', 'wb') as handle:
+        pickle.dump(valueDict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 # Resets the board to be all empty
@@ -190,21 +164,6 @@ def translateBoard(boardState):
         for row in range(3):
             numberString += str(board[col][row])
     return numberString
-
-# Gets the value of a specific board state, reward, etc
-def getStateValue(boardState):
-    global stateDict
-    translatedState = translateBoard(boardState)
-    try:
-        return stateDict[translatedState]
-    except:
-        print("Could not find board state.")
-        return None
-
-# Sets the value of a specific board state, reward, etc
-def setStateValue(boardState, val):
-    global stateDict
-    stateDict[translateBoard(boardState)] = val
 
 # Returns a list of tuples of all unused places on the board
 def returnValidSpaces():
@@ -280,13 +239,5 @@ def checkTie():
     if (not foundEmptySpace and not hasWon(0) and not hasWon(1)):
         return True
     return False
-
-def calculateReward(learningPlayer):
-    if (hasWon(currentPlayer)):
-        return 1
-    elif (hasWon((currentPlayer % 2) + 1)):
-        return 0
-    elif (checkTie()):
-        return 0.5
 
 ticTacGo()
